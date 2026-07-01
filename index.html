@@ -3,75 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema RNC - Elgin - Realtime DB</title>
+    <title>Sistema RNC - Elgin - Completo</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
-        h1 { color: #0056b3; margin: 0; font-size: 24px; }
-       .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
-        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-       .content { padding: 20px; }
-       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .form-group { display: flex; flex-direction: column; }
-       .form-group.full { grid-column: 1 / -1; }
-        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 15px; color: #333; }
+  .container { max-width: 1800px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+  .header-bar { background: linear-gradient(135deg, #0056b3 0%, #003d82 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        h1 { font-size: 24px; margin: 0; }
+  .sub { opacity: 0.9; font-size: 13px; margin-top: 3px; }
+  .botoes-header { display: flex; gap: 10px; }
+  .btn-header { color: white; padding: 10px 18px; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; transition: 0.2s; }
+  .btn-header:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+  .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  .btn-qualidade { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+  .tabs { display: flex; gap: 3px; background: #e9ecef; padding: 5px 5px 0 5px; }
+  .tab { padding: 12px 20px; background: #dee2e6; border: none; border-radius: 5px 5px 0 0; cursor: pointer; font-weight: 600; color: #495057; font-size: 14px; }
+  .tab:hover { background: #ced4da; }
+  .tab.active { background: #fff; color: #0056b3; }
+  .tab-content { display: none; padding: 20px; }
+  .tab-content.active { display: block; }
+  .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+  .status-online { color: #2e7d32; font-weight: bold; }
+  .status-erro { color: #d32f2f; font-weight: bold; }
+  .erro-box { background: #ffebee; color: #c62828; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 3px solid #c62828; display: none; font-size: 13px; }
+        h2 { color: #333; margin: 20px 0 15px 0; font-size: 17px; border-bottom: 2px solid #0056b3; padding-bottom: 5px; }
+ .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+ .form-group { display: flex; flex-direction: column; }
+ .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: 600; margin-bottom: 4px; font-size: 12px; color: #555; }
+        input, textarea, select { padding: 7px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
-        textarea { resize: vertical; }
-       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+ .input-ok { background-color: #e8f5e9!important; }
+ .input-warn { background-color: #fff3cd!important; }
+ .botoes { display: flex; gap: 10px; margin: 15px 0; flex-wrap: wrap; }
+        button { padding: 9px 18px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-       .btn-salvar { background: #28a745; color: white; }
-       .btn-salvar:hover:not(:disabled) { background: #218838; }
-       .btn-limpar { background: #6c757d; color: white; }
-       .btn-excel { background: #217346; color: #fff; }
-       .btn-export-pecas { background: #17a2b8; color: #fff; }
-       .btn-modelo { background: #fd7e14; color: #fff; }
-       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-       .status-online { color: #2e7d32; font-weight: bold; }
-       .status-erro { color: #d32f2f; font-weight: bold; }
-       .tabela-container { overflow-x: auto; margin-top: 20px; }
-       .tabela-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
-       .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #0056b3; color: white; position: sticky; top: 0; }
+ .btn-salvar { background: #28a745; color: white; }
+ .btn-salvar:hover:not(:disabled) { background: #218838; }
+ .btn-limpar { background: #6c757d; color: white; }
+ .btn-excel { background: #217346; color: #fff; }
+ .btn-export-pecas { background: #17a2b8; color: #fff; }
+ .btn-modelo { background: #fd7e14; color: #fff; }
+ .btn-etiqueta { background: #6f42c1; color: #fff; padding: 4px 8px; font-size: 11px; }
+ .btn-aprovar { background: #28a745; color: white; padding: 5px 10px; font-size: 11px; margin-right: 4px; }
+ .btn-reprovar { background: #dc3545; color: white; padding: 5px 10px; font-size: 11px; }
+ .btn-excluir { background: #dc3545; color: white; padding: 4px 8px; font-size: 11px; }
+ .btn-editar { background: #ffc107; color: #000; padding: 4px 8px; font-size: 11px; }
+ .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+ .card { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 3px solid; }
+ .card.total { border-color: #0056b3; }
+ .card.abertas { border-color: #dc3545; }
+ .card.fechadas { border-color: #28a745; }
+ .card.pecas { border-color: #17a2b8; }
+ .card-titulo { font-size: 11px; color: #666; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+ .card-valor { font-size: 28px; font-weight: bold; color: #333; }
+ .card-desc { font-size: 11px; color: #999; }
+ .graficos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 15px; }
+ .grafico-box { background: #f8f9fa; padding: 15px; border-radius: 8px; height: 280px; position: relative; }
+ .grafico-box canvas { max-height: 220px!important; }
+ .grafico-titulo { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #333; }
+ .tabela-container { overflow-x: auto; margin-top: 15px; }
+ .tabela-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+ .busca-input { padding: 7px; border: 1px solid #ccc; border-radius: 4px; width: 300px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+        th { background: #0056b3; color: white; font-weight: 600; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-       .loading { text-align: center; padding: 20px; color: #666; }
-       .input-ok { background-color: #e8f5e9!important; }
-       .input-warn { background-color: #fff3cd!important; }
-        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }.tabela-header { flex-direction: column; align-items: stretch; }.busca-input { width: 100%; } }
+        tr.urgente { background: #fff5f5; }
+        tr.muito-urgente { background: #ffe5e5; }
+ .loading { text-align: center; padding: 30px; color: #999; font-size: 13px; }
+ .nova-peca-box { display:none; grid-column: 1 / -1; background:#fff3cd; padding:12px; border-radius:5px; border:1px solid #ffc107; }
+ .badge-dias { padding: 3px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; }
+ .badge-normal { background: #e8f5e9; color: #2e7d32; }
+ .badge-alerta { background: #fff3e0; color: #e65100; }
+ .badge-critico { background: #ffebee; color: #c62828; }
+ .dias-alerta { font-weight: bold; color: #dc3545; }
+ .cards-qualidade { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 15px; }
+ .card-qualidade { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 1px 5px rgba(0,0,0,0.1); border-left: 3px solid; }
+ .card-qualidade.vermelho { border-color: #dc3545; }
+ .card-qualidade.laranja { border-color: #fd7e14; }
+ .card-qualidade.roxo { border-color: #6f42c1; }
+ .card-num { font-size: 28px; font-weight: bold; }
+ .card-label { font-size: 11px; color: #666; text-transform: uppercase; }
+        @media (max-width: 900px) {.form-grid,.graficos,.cards-qualidade { grid-template-columns: 1fr; }.grafico-box { height: 260px; }.header-bar { flex-direction: column; gap: 10px; }.botoes-header { width: 100%; }.btn-header { flex: 1; text-align: center; }}
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>Sistema de Cadastro RNC - Elgin</h1>
-            <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
+            <div>
+                <h1>📋 Sistema RNC - Elgin</h1>
+                <div class="sub">Gestão Completa de Não Conformidades - Realtime Database</div>
+            </div>
+            <div class="botoes-header">
+                <button onclick="abrirAbaDirect('dashboard')" class="btn-header btn-dashboard">📊 Dashboard</button>
+                <button onclick="abrirAbaDirect('qualidade')" class="btn-header btn-qualidade">✅ Qualidade</button>
+            </div>
         </div>
 
-        <div class="content">
+        <div class="tabs">
+            <button class="tab active" onclick="abrirAba(event, 'cadastro')">📝 CADASTRO</button>
+            <button class="tab" onclick="abrirAba(event, 'dashboard')">📊 DASHBOARD</button>
+            <button class="tab" onclick="abrirAba(event, 'qualidade')">✅ QUALIDADE</button>
+        </div>
+
+        <!-- ABA 1: CADASTRO -->
+        <div id="cadastro" class="tab-content active">
             <div class="status-box">
                 <span id="statusPecas">Conectando...</span>
-                <span class="status-online">● Realtime Database</span>
+                <span class="status-online">● Realtime DB</span>
             </div>
+            <div id="erroBox" class="erro-box"></div>
 
             <h2>1. Importar Lista de Peças</h2>
-            <div class="form-group full" style="background:#e8f4ff; padding:15px; border-radius:5px; margin-bottom:15px;">
+            <div class="form-group full" style="background:#e8f4ff; padding:12px; border-radius:5px; margin-bottom:15px;">
                 <label for="import_pecas"><strong>Arquivo CSV/Excel - Aceita. # $ [ ] / no código</strong></label>
                 <input type="file" id="import_pecas" accept=".csv,.xlsx,.xls" style="margin-top:5px;">
-                <small style="display:block; margin-top:5px; color:#555;">Coluna A = Código Peça | Coluna B = Denominação | Formate coluna A como Texto no Excel</small>
+                <small style="display:block; margin-top:5px; color:#555; font-size:11px;">Coluna A = Código | B = Denominação | Formate coluna A como Texto</small>
                 <div class="botoes" style="margin-top:10px;">
                     <button type="button" id="btnSalvarLista" class="btn-salvar" onclick="salvarListaPecas()">💾 Salvar Lista</button>
                     <button type="button" class="btn-modelo" onclick="baixarModeloPecas()">📥 Baixar Modelo</button>
-                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista Atual</button>
+                    <button type="button" class="btn-export-pecas" onclick="exportarListaPecas()">📊 Exportar Lista</button>
                 </div>
             </div>
 
@@ -91,15 +145,15 @@
                         <label for="denominacao">DENOMINAÇÃO *</label>
                         <input type="text" id="denominacao" required readonly>
                     </div>
-                    <div id="nova_peca_box" style="display:none; grid-column: 1 / -1; background:#fff3cd; padding:15px; border-radius:5px; border:1px solid #ffc107;">
-                        <p style="margin:0 0 10px 0; font-weight:bold; color:#856404;">⚠ Código não encontrado na lista</p>
-                        <div style="display:flex; gap:10px; align-items:end;">
+                    <div id="nova_peca_box" class="nova-peca-box">
+                        <p style="margin:0 0 8px 0; font-weight:600; color:#856404; font-size:12px;">⚠ Código não encontrado</p>
+                        <div style="display:flex; gap:8px; align-items:end;">
                             <div style="flex:1;">
-                                <label style="font-size:12px;">Denominação da nova peça:</label>
+                                <label style="font-size:11px;">Denominação da nova peça:</label>
                                 <input type="text" id="nova_denominacao" placeholder="Digite a denominação" style="width:100%; padding:6px;">
                             </div>
-                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">+ Cadastrar Peça</button>
-                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:8px 15px; border:none; border-radius:4px; cursor:pointer;">Cancelar</button>
+                            <button type="button" onclick="cadastrarNovaPeca()" style="background:#28a745; color:#fff; padding:7px 12px; border:none; border-radius:4px; cursor:pointer; font-size:12px;">+ Cadastrar</button>
+                            <button type="button" onclick="cancelarNovaPeca()" style="background:#6c757d; color:#fff; padding:7px 12px; border:none; border-radius:4px; cursor:pointer; font-size:12px;">Cancelar</button>
                         </div>
                     </div>
                     <div class="form-group">
@@ -154,27 +208,105 @@
                         <label for="acao_corretiva">AÇÃO CORRETIVA PROPOSTA</label>
                         <textarea id="acao_corretiva" rows="2"></textarea>
                     </div>
-                </div>
                 <div class="botoes">
                     <button type="submit" class="btn-salvar">SALVAR RNC</button>
                     <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
-                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs para Excel</button>
+                    <button type="button" class="btn-excel" onclick="exportarExcelRNCs()">📊 Exportar RNCs</button>
                 </div>
             </form>
 
             <h2>3. RNCs Cadastradas</h2>
             <div class="tabela-header">
-                <input type="text" id="busca" class="busca-input" placeholder="Buscar por NF, Código Peça, Produto..." oninput="filtrarTabela()">
-                <span id="contadorRNCs"></span>
+                <input type="text" id="busca" class="busca-input" placeholder="Buscar NF, Peça, Produto..." oninput="filtrarTabela()">
+                <span id="contadorRNCs" style="font-size:12px;"></span>
             </div>
             <div class="tabela-container">
                 <table id="tabelaRNC">
                     <thead>
                         <tr>
-                            <th>ID</th><th>Data</th><th>Cód. Produto</th><th>Cód. Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Operador</th><th>Status</th><th>Ações</th>
+                            <th>ID</th><th>Data</th><th>Produto</th><th>Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Operador</th><th>Status</th><th>Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaBody"><tr><td colspan="11" class="loading">Carregando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA 2: DASHBOARD -->
+        <div id="dashboard" class="tab-content">
+            <div id="erroBoxDash" class="erro-box"></div>
+            <div class="cards">
+                <div class="card total">
+                    <div class="card-titulo">Total RNCs</div>
+                    <div class="card-valor" id="totalRNCs">0</div>
+                    <div class="card-desc">Todas cadastradas</div>
+                </div>
+                <div class="card abertas">
+                    <div class="card-titulo">Abertas</div>
+                    <div class="card-valor" id="rncsAbertas">0</div>
+                    <div class="card-desc">Aguardando ação</div>
+                </div>
+                <div class="card fechadas">
+                    <div class="card-titulo">Fechadas</div>
+                    <div class="card-valor" id="rncsFechadas">0</div>
+                    <div class="card-desc">Resolvidas</div>
+                </div>
+                <div class="card pecas">
+                    <div class="card-titulo">Peças</div>
+                    <div class="card-valor" id="totalPecasDash">0</div>
+                    <div class="card-desc">Lista mestre</div>
+                </div>
+            <div class="graficos">
+                <div class="grafico-box">
+                    <div class="grafico-titulo">Por Origem</div>
+                    <canvas id="graficoOrigem"></canvas>
+                </div>
+                <div class="grafico-box">
+                    <div class="grafico-titulo">Status</div>
+                    <canvas id="graficoStatus"></canvas>
+                </div>
+                <div class="grafico-box">
+                    <div class="grafico-titulo">Top 5 Peças</div>
+                    <canvas id="graficoPecas"></canvas>
+                </div>
+                <div class="grafico-box">
+                    <div class="grafico-titulo">Por Mês</div>
+                    <canvas id="graficoMes"></canvas>
+                </div>
+            <div class="tabela-container">
+                <div class="grafico-titulo">Últimas 10 RNCs</div>
+                <table>
+                    <thead><tr><th>Data</th><th>Produto</th><th>Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Status</th></tr></thead>
+                    <tbody id="tbodyRecentes"><tr><td colspan="7" class="loading">Carregando...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ABA 3: TELA DA QUALIDADE -->
+        <div id="qualidade" class="tab-content">
+            <div class="cards-qualidade">
+                <div class="card-qualidade vermelho">
+                    <div class="card-num" id="qtdAbertas">0</div>
+                    <div class="card-label">RNCs Abertas</div>
+                </div>
+                <div class="card-qualidade laranja">
+                    <div class="card-num" id="qtd7dias">0</div>
+                    <div class="card-label">+ 7 Dias</div>
+                </div>
+                <div class="card-qualidade roxo">
+                    <div class="card-num" id="qtdCriticas">0</div>
+                    <div class="card-label">Críticas</div>
+                </div>
+            </div>
+            <input type="text" id="buscaQualidade" class="busca-input" style="width:100%;margin-bottom:15px;" placeholder="Buscar por NF, Peça ou Produto..." oninput="filtrarQualidade()">
+            <div class="tabela-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th><th>Produto</th><th>Peça</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Dias</th><th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyQualidade"><tr><td colspan="9" class="loading">Carregando...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -183,7 +315,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, set, update, remove, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
         const firebaseConfig = {
@@ -193,54 +324,76 @@
           projectId: "nc-versao2",
           storageBucket: "nc-versao2.firebasestorage.app",
           messagingSenderId: "584567247229",
-          appId: "1:584567247229:web:9c397236f3e08cc3247c14",
-          measurementId: "G-F9HFPQ07K2"
+          appId: "1:584567247229:web:9c397236f3e08cc3247c14"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const analytics = getAnalytics(app);
 
-        let pecasDB = {};
-        let pecasTempDB = {};
-        let listaPecasSalva = false;
-        let todasRNCs = {};
+        let pecasDB = {}, pecasTempDB = {}, listaPecasSalva = false;
+        let todasRNCs = {}, rncsAbertas = [];
+        let chartOrigem, chartMes, chartPecas, chartStatus;
 
+        const optGrafico = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, padding: 6 } } },
+            scales: { x: { ticks: { font: { size: 9 } } }, y: { ticks: { font: { size: 9 } } } }
+        };
+
+        // ABAS
+        window.abrirAba = function(evt, nome) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(nome).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            if (nome === 'qualidade') carregarQualidade();
+        }
+        window.abrirAbaDirect = function(nome) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(nome).classList.add('active');
+            document.querySelectorAll('.tab').forEach(t => {
+                if(t.textContent.includes(nome === 'dashboard'? 'DASHBOARD' : nome === 'qualidade'? 'QUALIDADE' : 'CADASTRO')) t.classList.add('active');
+            });
+            if (nome === 'qualidade') carregarQualidade();
+        }
+
+        // INIT
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('data').valueAsDate = new Date();
             await carregarPecas();
             carregarRNCs();
         });
 
+        // PECAS
         async function carregarPecas() {
             try {
-                document.getElementById('statusPecas').innerHTML = 'Conectando ao Realtime DB...';
-                const snapshot = await get(ref(db, 'pecas'));
-                pecasDB = snapshot.exists()? snapshot.val() : {};
+                const snap = await get(ref(db, 'pecas'));
+                pecasDB = snap.exists()? snap.val() : {};
                 listaPecasSalva = Object.keys(pecasDB).length > 0;
                 atualizarStatusPecas();
             } catch (e) {
                 document.getElementById('statusPecas').innerHTML = `<span class="status-erro">Erro: ${e.message}</span>`;
-                console.error(e);
             }
         }
 
         function atualizarStatusPecas() {
             const qtd = Object.keys(pecasTempDB).length || Object.keys(pecasDB).length;
             const status = listaPecasSalva? '<span class="status-online">Sincronizado</span>' : '<span style="color:#d32f2f;font-weight:bold;">Não salvo</span>';
-            document.getElementById('statusPecas').innerHTML = `Peças no DB: ${qtd} | Status: ${status}`;
+            document.getElementById('statusPecas').innerHTML = `Peças: ${qtd} | ${status}`;
             document.getElementById('btnSalvarLista').disabled = listaPecasSalva || qtd === 0;
+            document.getElementById('totalPecasDash').innerText = Object.keys(pecasDB).length;
         }
 
-        function buscarDenominacao(codigo) {
-            const codigoBusca = codigo.trim().toUpperCase();
+        function buscarDenominacao(cod) {
             const fonte = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
-            const encontrada = Object.values(fonte).find(p => p.codigo?.toUpperCase() === codigoBusca);
-            return encontrada?.denominacao || null;
+            const e = Object.values(fonte).find(p => p.codigo?.toUpperCase() === cod.toUpperCase());
+            return e?.denominacao || null;
         }
 
-        function codigoExiste(codigo) {
-            return Object.values(pecasDB).some(p => p.codigo?.toUpperCase() === codigo.toUpperCase());
+        function codigoExiste(cod) {
+            return Object.values(pecasDB).some(p => p.codigo?.toUpperCase() === cod.toUpperCase());
         }
 
         document.getElementById('import_pecas').addEventListener('change', function(e) {
@@ -249,30 +402,22 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array', raw: true});
-                const sheet = workbook.Sheets[workbook.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1, defval: ''});
+                const wb = XLSX.read(data, {type: 'array', raw: true});
+                const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, defval: ''});
                 pecasTempDB = {};
-                let duplicadas = 0;
-
+                let dup = 0;
                 json.forEach((row, i) => {
                     if (i === 0 ||!row[0]) return;
-                    let codigo = String(row[0]).replace(/[\n\r\t]/g, '').trim();
-                    const denom = String(row[1] || '').trim();
-                    if (codigo && denom) {
-                        if (codigoExiste(codigo)) {
-                            duplicadas++;
-                        } else {
-                            pecasTempDB[codigo] = {codigo, denominacao: denom};
-                        }
+                    let cod = String(row[0]).replace(/[\n\r\t]/g, '').trim();
+                    const den = String(row[1] || '').trim();
+                    if (cod && den) {
+                        if (codigoExiste(cod)) dup++;
+                        else pecasTempDB[cod] = {codigo: cod, denominacao: den};
                     }
                 });
-
                 listaPecasSalva = false;
                 atualizarStatusPecas();
-                let msg = `${Object.keys(pecasTempDB).length} peças novas carregadas.`;
-                if (duplicadas) msg += `\n${duplicadas} já existem e foram ignoradas.`;
-                alert(msg + '\n\nClique em Salvar Lista para enviar.');
+                alert(`${Object.keys(pecasTempDB).length} peças carregadas.${dup?' '+dup+' duplicadas ignoradas.':''}`);
             };
             reader.readAsArrayBuffer(file);
         });
@@ -280,24 +425,18 @@
         window.salvarListaPecas = async function() {
             if (Object.keys(pecasTempDB).length === 0) return;
             const btn = document.getElementById('btnSalvarLista');
-            btn.disabled = true;
-            btn.innerText = 'Enviando...';
+            btn.disabled = true; btn.innerText = 'Enviando...';
             try {
-                const updates = {};
+                const up = {};
                 Object.values(pecasTempDB).forEach(p => {
-                    const newKey = push(ref(db, 'pecas')).key;
-                    updates[`pecas/${newKey}`] = {
-                      ...p,
-                        criado_em: new Date().toISOString()
-                    };
+                    const k = push(ref(db, 'pecas')).key;
+                    up[`pecas/${k}`] = {...p, criado_em: new Date().toISOString()};
                 });
-                await update(ref(db), updates);
+                await update(ref(db), up);
                 await carregarPecas();
-                pecasTempDB = {};
-                listaPecasSalva = true;
+                pecasTempDB = {}; listaPecasSalva = true;
                 atualizarStatusPecas();
-                alert('Lista salva! Códigos com. # $ [ ] / aceitos.');
-                logEvent(analytics, 'pecas_importadas');
+                alert('Lista salva!');
             } catch (e) {
                 alert('Erro: ' + e.message);
             } finally {
@@ -306,64 +445,46 @@
         }
 
         window.baixarModeloPecas = function() {
-            const dados = [
-                ['Código Peça', 'Denominação'],
-                ['4401.225', 'CARCAÇA FRONTAL'],
-                ['PEÇA#01', 'TAMPA TRASEIRA'],
-                ['COD[1]', 'MOTOR VENTILADOR'],
-                ['001234', 'PARAFUSO M8']
-            ];
-            const ws = XLSX.utils.aoa_to_sheet(dados);
+            const d = [['Código Peça', 'Denominação'], ['4401.225', 'CARCAÇA FRONTAL'], ['PEÇA#01', 'TAMPA'], ['001234', 'PARAFUSO']];
+            const ws = XLSX.utils.aoa_to_sheet(d);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Modelo');
-            XLSX.writeFile(wb, 'Modelo_Importar_Pecas.xlsx');
+            XLSX.writeFile(wb, 'Modelo_Pecas.xlsx');
         }
 
         window.exportarListaPecas = function() {
-            if (Object.keys(pecasDB).length === 0) { alert('Nenhuma peça cadastrada!'); return; }
-            const dados = [['Código Peça', 'Denominação']];
-            Object.values(pecasDB).forEach(p => dados.push([p.codigo, p.denominacao]));
-            const ws = XLSX.utils.aoa_to_sheet(dados);
+            if (Object.keys(pecasDB).length === 0) return alert('Nenhuma peça!');
+            const d = [['Código', 'Denominação']];
+            Object.values(pecasDB).forEach(p => d.push([p.codigo, p.denominacao]));
+            const ws = XLSX.utils.aoa_to_sheet(d);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Peças');
-            XLSX.writeFile(wb, 'Lista_Pecas_Elgin.xlsx');
+            XLSX.writeFile(wb, 'Lista_Pecas.xlsx');
         }
 
         document.getElementById('codigo_peca').addEventListener('blur', function() {
-            const codigo = this.value.trim();
-            const denom = buscarDenominacao(codigo);
-            const inputDenom = document.getElementById('denominacao');
-            const novaBox = document.getElementById('nova_peca_box');
-            if (denom) {
-                inputDenom.value = denom;
-                inputDenom.classList.add('input-ok');
-                inputDenom.classList.remove('input-warn');
-                novaBox.style.display = 'none';
-            } else if (codigo) {
-                inputDenom.value = '';
-                inputDenom.placeholder = 'Código não encontrado';
-                inputDenom.classList.add('input-warn');
-                inputDenom.classList.remove('input-ok');
-                novaBox.style.display = 'block';
+            const cod = this.value.trim();
+            const den = buscarDenominacao(cod);
+            const inp = document.getElementById('denominacao');
+            const box = document.getElementById('nova_peca_box');
+            if (den) {
+                inp.value = den; inp.classList.add('input-ok'); inp.classList.remove('input-warn'); box.style.display = 'none';
+            } else if (cod) {
+                inp.value = ''; inp.placeholder = 'Não encontrado'; inp.classList.add('input-warn'); box.style.display = 'block';
             } else {
-                inputDenom.classList.remove('input-ok', 'input-warn');
-                novaBox.style.display = 'none';
+                inp.classList.remove('input-ok', 'input-warn'); box.style.display = 'none';
             }
         });
 
         window.cadastrarNovaPeca = async function() {
-            const codigo = document.getElementById('codigo_peca').value.trim();
-            const denom = document.getElementById('nova_denominacao').value.trim();
-            if (!codigo ||!denom) { alert('Preencha código e denominação!'); return; }
-            if (codigoExiste(codigo)) { alert('Código já cadastrado!'); return; }
+            const cod = document.getElementById('codigo_peca').value.trim();
+            const den = document.getElementById('nova_denominacao').value.trim();
+            if (!cod ||!den) return alert('Preencha código e denominação!');
+            if (codigoExiste(cod)) return alert('Código já existe!');
             try {
-                await push(ref(db, 'pecas'), {
-                    codigo: codigo,
-                    denominacao: denom,
-                    criado_em: new Date().toISOString()
-                });
+                await push(ref(db, 'pecas'), {codigo: cod, denominacao: den, criado_em: new Date().toISOString()});
                 await carregarPecas();
-                document.getElementById('denominacao').value = denom;
+                document.getElementById('denominacao').value = den;
                 document.getElementById('denominacao').classList.add('input-ok');
                 document.getElementById('nova_peca_box').style.display = 'none';
                 document.getElementById('nova_denominacao').value = '';
@@ -380,9 +501,24 @@
             document.getElementById('denominacao').classList.remove('input-ok', 'input-warn');
         }
 
+        // RNCS
+        function carregarRNCs() {
+            onValue(ref(db, 'rncs'), (snap) => {
+                document.querySelectorAll('.erro-box').forEach(e => e.style.display = 'none');
+                todasRNCs = snap.exists()? snap.val() : {};
+                const lista = Object.entries(todasRNCs).map(([id,d])=>({id,...d}));
+                renderizarCadastro(lista);
+                renderizarDashboard(lista);
+                rncsAbertas = lista.filter(r => r.status === 'Aberta');
+            }, (err) => {
+                const msg = `Erro: ${err.message}`;
+                document.querySelectorAll('.erro-box').forEach(e => { e.style.display = 'block'; e.innerText = msg; });
+            });
+        }
+
         document.getElementById('formRNC').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const editId = document.getElementById('editId').value;
+            const id = document.getElementById('editId').value;
             const rnc = {
                 cod_produto: document.getElementById('cod_produto').value,
                 cod_peca: document.getElementById('codigo_peca').value.trim(),
@@ -395,21 +531,20 @@
                 data: document.getElementById('data').value,
                 visto: document.getElementById('visto').value,
                 visto_operador: document.getElementById('visto_operador').value,
+                 visto: document.getElementById('visto').value,
+                visto_operador: document.getElementById('visto_operador').value,
                 status: document.getElementById('status').value,
                 nao_conforme: document.getElementById('nao_conforme').value,
                 acao_corretiva: document.getElementById('acao_corretiva').value,
                 criado_em: new Date().toISOString()
             };
-
             try {
-                if (editId) {
-                    await update(ref(db, `rncs/${editId}`), rnc);
+                if (id) {
+                    await update(ref(db, `rncs/${id}`), rnc);
                     alert('RNC atualizada!');
-                    logEvent(analytics, 'rnc_editada');
                 } else {
                     await push(ref(db, 'rncs'), rnc);
                     alert('RNC cadastrada!');
-                    logEvent(analytics, 'rnc_criada', {origem: rnc.origem_defeito});
                 }
                 limparForm();
             } catch (e) {
@@ -417,41 +552,31 @@
             }
         });
 
-        function carregarRNCs() {
-            onValue(ref(db, 'rncs'), (snapshot) => {
-                todasRNCs = snapshot.exists()? snapshot.val() : {};
-                renderizarTabela(todasRNCs);
-            });
-        }
-
-        function renderizarTabela(lista) {
+        function renderizarCadastro(lista) {
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '';
-            const arr = Object.entries(lista).map(([id, data]) => ({id,...data}));
-            document.getElementById('contadorRNCs').innerText = `${arr.length} RNCs encontradas`;
-
-            if (arr.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC encontrada.</td></tr>';
+            document.getElementById('contadorRNCs').innerText = `${lista.length} RNCs`;
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada</td></tr>';
                 return;
             }
-
-            arr.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach((rnc) => {
+            lista.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach(r => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${rnc.id.slice(-6)}</td>
-                    <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                    <td>${rnc.cod_produto}</td>
-                    <td>${rnc.cod_peca}</td>
-                    <td>${rnc.origem_defeito || '-'}</td>
-                    <td>${rnc.nf}</td>
-                    <td>${rnc.qtd}</td>
-                    <td>${rnc.nao_conforme.substring(0, 50)}...</td>
-                    <td>${rnc.visto_operador || '-'}</td>
-                    <td>${rnc.status}</td>
+                    <td>${r.id.slice(-6)}</td>
+                    <td>${new Date(r.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${r.cod_produto}</td>
+                    <td>${r.cod_peca}</td>
+                    <td>${r.origem_defeito||'-'}</td>
+                    <td>${r.nf}</td>
+                    <td>${r.qtd}</td>
+                    <td title="${r.nao_conforme}">${r.nao_conforme.substring(0,30)}...</td>
+                    <td>${r.visto_operador||'-'}</td>
+                    <td>${r.status}</td>
                     <td>
-                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${rnc.id}')">🏷 Etiqueta</button>
-                        <button class="btn-editar" onclick="editarRNC('${rnc.id}')">Editar</button>
-                        <button class="btn-excluir" onclick="excluirRNC('${rnc.id}')">Excluir</button>
+                        <button class="btn-etiqueta" onclick="imprimirEtiqueta('${r.id}')">🏷</button>
+                        <button class="btn-editar" onclick="editarRNC('${r.id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirRNC('${r.id}')">Excluir</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -460,124 +585,245 @@
 
         window.filtrarTabela = function() {
             const termo = document.getElementById('busca').value.toLowerCase();
-            const filtradas = Object.fromEntries(
-                Object.entries(todasRNCs).filter(([id, r]) =>
-                    r.nf.toLowerCase().includes(termo) ||
-                    r.cod_peca.toLowerCase().includes(termo) ||
-                    r.cod_produto.toLowerCase().includes(termo) ||
-                    r.nao_conforme.toLowerCase().includes(termo)
-                )
+            const filtradas = Object.entries(todasRNCs).map(([id,d])=>({id,...d})).filter(r =>
+                r.nf.toLowerCase().includes(termo) ||
+                r.cod_peca.toLowerCase().includes(termo) ||
+                r.cod_produto.toLowerCase().includes(termo)
             );
-            renderizarTabela(filtradas);
-        }
-
-        window.editarRNC = function(id) {
-            const rnc = todasRNCs[id];
-            if (rnc) {
-                document.getElementById('editId').value = id;
-                document.getElementById('cod_produto').value = rnc.cod_produto;
-                document.getElementById('codigo_peca').value = rnc.cod_peca;
-                document.getElementById('denominacao').value = rnc.denominacao;
-                document.getElementById('origem_defeito').value = rnc.origem_defeito || '';
-                document.getElementById('fornecedor').value = rnc.fornecedor;
-                document.getElementById('nf').value = rnc.nf;
-                document.getElementById('qtd').value = rnc.qtd;
-                document.getElementById('reserva').value = rnc.reserva;
-                document.getElementById('data').value = rnc.data;
-                document.getElementById('visto').value = rnc.visto;
-                document.getElementById('visto_operador').value = rnc.visto_operador || '';
-                document.getElementById('status').value = rnc.status;
-                document.getElementById('nao_conforme').value = rnc.nao_conforme;
-                document.getElementById('acao_corretiva').value = rnc.acao_corretiva;
-                window.scrollTo(0, 0);
-            }
-        }
-
-        window.excluirRNC = async function(id) {
-            if (confirm('Tem certeza que deseja excluir esta RNC?')) {
-                try {
-                    await remove(ref(db, `rncs/${id}`));
-                    logEvent(analytics, 'rnc_excluida');
-                } catch (e) {
-                    alert('Erro: ' + e.message);
-                }
-            }
+            renderizarCadastro(filtradas);
         }
 
         window.limparForm = function() {
             document.getElementById('formRNC').reset();
             document.getElementById('editId').value = '';
             document.getElementById('data').valueAsDate = new Date();
-            document.getElementById('denominacao').classList.remove('input-ok', 'input-warn');
+            document.getElementById('denominacao').classList.remove('input-ok','input-warn');
             document.getElementById('nova_peca_box').style.display = 'none';
         }
 
-        window.exportarExcelRNCs = function() {
-            const arr = Object.values(todasRNCs);
-            if (arr.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
-            const dados = arr.map(r => ({
-                Data: r.data,
-                'Cód. Produto': r.cod_produto,
-                'Cód. Peça': r.cod_peca,
-                Denominação: r.denominacao,
-                Origem: r.origem_defeito,
-                Fornecedor: r.fornecedor,
-                NF: r.nf,
-                QTD: r.qtd,
-                Reserva: r.reserva,
-                Inspetor: r.visto,
-                Operador: r.visto_operador,
-                Status: r.status,
-                'Não Conformidade': r.nao_conforme,
-                'Ação Corretiva': r.acao_corretiva
-            }));
-            const ws = XLSX.utils.json_to_sheet(dados);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
-            XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
+        window.editarRNC = function(id) {
+            const r = todasRNCs[id];
+            if(!r) return;
+            document.getElementById('editId').value = id;
+            document.getElementById('cod_produto').value = r.cod_produto;
+            document.getElementById('codigo_peca').value = r.cod_peca;
+            document.getElementById('denominacao').value = r.denominacao;
+            document.getElementById('origem_defeito').value = r.origem_defeito;
+            document.getElementById('fornecedor').value = r.fornecedor||'';
+            document.getElementById('nf').value = r.nf;
+            document.getElementById('qtd').value = r.qtd;
+            document.getElementById('reserva').value = r.reserva||'';
+            document.getElementById('data').value = r.data;
+            document.getElementById('visto').value = r.visto;
+            document.getElementById('visto_operador').value = r.visto_operador;
+            document.getElementById('status').value = r.status;
+            document.getElementById('nao_conforme').value = r.nao_conforme;
+            document.getElementById('acao_corretiva').value = r.acao_corretiva||'';
+            document.getElementById('formRNC').scrollIntoView({behavior:'smooth'});
         }
 
-        window.imprimirEtiqueta = function(id) {
-            const rnc = {...todasRNCs[id], id};
-            if (rnc) {
-                const etiquetaHTML = gerarEtiqueta100x60(rnc);
-                const win = window.open('', '_blank', 'width=400,height=300');
-                win.document.write(etiquetaHTML);
-                win.document.close();
-                logEvent(analytics, 'etiqueta_impressa');
+        window.excluirRNC = async function(id) {
+            if(!confirm('Excluir esta RNC?')) return;
+            try {
+                await remove(ref(db, `rncs/${id}`));
+                alert('RNC excluída!');
+            } catch(e) {
+                alert('Erro: '+e.message);
             }
         }
 
-        function gerarEtiqueta100x60(rnc) {
-            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
-<style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
-.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
-.header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
-.linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
-.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
-.footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
-.nao-conf { font-size: 7pt; max-height: 7mm; overflow: hidden; }
-@media print {.no-print { display: none; } body { margin: 0; } }
-.no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-</style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
-<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
-<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
-<div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
-<div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
-<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
-<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
-<div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
-<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
-<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
-<div class="footer">
-    <div style="display:flex; justify-content:space-between;">
-        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
-        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
-    </div>
-    <div style="text-align:right;">ID: ${rnc.id.slice(-6)}</div>
-</div>
-</div></body></html>`;
+        window.imprimirEtiqueta = function(id) {
+            const r = todasRNCs[id];
+            if(!r) return;
+            const win = window.open('', '_blank');
+            win.document.write(`
+                <html><head><title>Etiqueta RNC</title>
+                <style>body{font-family:Arial;margin:20px;}.etiqueta{border:2px solid #000;padding:15px;width:300px;} h3{margin:0 0 10px 0;}.linha{margin:5px 0;font-size:13px;}</style>
+                </head><body onload="window.print()">
+                <div class="etiqueta">
+                    <h3>🔧 RNC - ELGIN</h3>
+                    <div class="linha"><strong>ID:</strong> ${r.id.slice(-6)}</div>
+                    <div class="linha"><strong>Data:</strong> ${new Date(r.data+'T00:00:00').toLocaleDateString('pt-BR')}</div>
+                    <div class="linha"><strong>Produto:</strong> ${r.cod_produto}</div>
+                    <div class="linha"><strong>Peça:</strong> ${r.cod_peca}</div>
+                    <div class="linha"><strong>NF:</strong> ${r.nf}</div>
+                    <div class="linha"><strong>QTD:</strong> ${r.qtd}</div>
+                    <div class="linha"><strong>Status:</strong> ${r.status}</div>
+                </div></body></html>
+            `);
+            win.document.close();
+        }
+
+        window.exportarExcelRNCs = function() {
+            const lista = Object.values(todasRNCs);
+            if(lista.length === 0) return alert('Nenhuma RNC para exportar!');
+            const d = [['ID','Data','Produto','Peça','Denominação','Origem','Fornecedor','NF','QTD','Reserva','Não Conformidade','Ação Corretiva','Inspetor','Operador','Status']];
+            lista.forEach(r => d.push([r.id.slice(-6), r.data, r.cod_produto, r.cod_peca, r.denominacao, r.origem_defeito, r.fornecedor||'', r.nf, r.qtd, r.reserva||'', r.nao_conforme, r.acao_corretiva||'', r.visto, r.visto_operador, r.status]));
+            const ws = XLSX.utils.aoa_to_sheet(d);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
+            XLSX.writeFile(wb, `RNCs_${new Date().toISOString().slice(0,10)}.xlsx`);
+        }
+
+        // DASHBOARD
+        function renderizarDashboard(lista) {
+            document.getElementById('totalRNCs').innerText = lista.length;
+            document.getElementById('rncsAbertas').innerText = lista.filter(r => r.status === 'Aberta').length;
+            document.getElementById('rncsFechadas').innerText = lista.filter(r => r.status === 'Fechada').length;
+            document.getElementById('totalPecasDash').innerText = Object.keys(pecasDB).length;
+
+            // Origem
+            const origem = {};
+            lista.forEach(r => origem[r.origem_defeito || 'N/I'] = (origem[r.origem_defeito || 'N/I'] || 0) + 1);
+            criarGrafico('graficoOrigem', 'bar', origem);
+
+            // Status
+            const abertas = lista.filter(r => r.status === 'Aberta').length;
+            const fechadas = lista.filter(r => r.status === 'Fechada').length;
+            criarGrafico('graficoStatus', 'doughnut', {'Abertas':abertas,'Fechadas':fechadas});
+
+            // Top 5 Peças
+            const pecas = {};
+            lista.forEach(r => pecas[r.cod_peca] = (pecas[r.cod_peca] || 0) + 1);
+            const top5 = Object.entries(pecas).sort((a,b) => b[1]-a[1]).slice(0,5).reduce((o,[k,v]) => (o[k]=v,o), {});
+            criarGrafico('graficoPecas', 'bar', top5, true);
+
+            // Por Mês
+            const mes = {};
+            lista.forEach(r => {
+                const m = r.data? r.data.substring(0,7) : 'S/D';
+                mes[m] = (mes[m] || 0) + 1;
+            });
+            criarGrafico('graficoMes', 'line', mes);
+
+            // Tabela
+            const tbody = document.getElementById('tbodyRecentes');
+            tbody.innerHTML = '';
+            lista.sort((a,b) => new Date(b.data) - new Date(a.data)).slice(0,10).forEach(r => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${new Date(r.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                        <td>${r.cod_produto}</td>
+                        <td>${r.cod_peca}</td>
+                        <td>${r.origem_defeito||'-'}</td>
+                        <td>${r.nf}</td>
+                        <td>${r.qtd}</td>
+                        <td>${r.status}</td>
+                    </tr>
+                `;
+            });
+            if(lista.length === 0) tbody.innerHTML = '<tr><td colspan="7" class="loading">Nenhuma RNC</td></tr>';
+        }
+
+        function criarGrafico(id, tipo, dados, horizontal = false) {
+            const ctx = document.getElementById(id);
+            let chartVar = id === 'graficoOrigem'? chartOrigem : id === 'graficoStatus'? chartStatus : id === 'graficoPecas'? chartPecas : chartMes;
+            if (chartVar) chartVar.destroy();
+            const novo = new Chart(ctx, {
+                type: tipo,
+                data: {
+                    labels: Object.keys(dados),
+                    datasets: [{
+                        data: Object.values(dados),
+                        backgroundColor: tipo === 'doughnut'? ['#dc3545','#28a745'] : 'rgba(102, 126, 234, 0.7)',
+                        borderColor: tipo === 'doughnut'? ['#dc3545','#28a745'] : 'rgba(102, 126, 234, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {...optGrafico, indexAxis: horizontal? 'y' : 'x'}
+            });
+            if(id === 'graficoOrigem') chartOrigem = novo;
+            else if(id === 'graficoStatus') chartStatus = novo;
+            else if(id === 'graficoPecas') chartPecas = novo;
+            else chartMes = novo;
+        }
+
+        // QUALIDADE
+        function carregarQualidade() {
+            const abertas = Object.entries(todasRNCs).map(([id,d])=>({id,...d})).filter(r => r.status === 'Aberta');
+            renderizarQualidade(abertas);
+        }
+
+        function renderizarQualidade(lista) {
+            const hoje = new Date();
+            document.getElementById('qtdAbertas').innerText = lista.length;
+            document.getElementById('qtd7dias').innerText = lista.filter(r => diasAberta(r.data) > 7).length;
+            document.getElementById('qtdCriticas').innerText = lista.filter(r => r.origem_defeito === 'Fornecedor' && r.qtd > 100).length;
+
+            const tbody = document.getElementById('tbodyQualidade');
+            tbody.innerHTML = '';
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" class="loading">Nenhuma RNC aberta 🎉</td></tr>';
+                return;
+            }
+
+            lista.sort((a,b) => new Date(a.data) - new Date(b.data)).forEach(r => {
+                const dias = diasAberta(r.data);
+                const classe = dias > 30? 'muito-urgente' : dias > 7? 'urgente' : '';
+                const badge = dias > 30? 'badge-critico' : dias > 7? 'badge-alerta' : 'badge-normal';
+                const tr = document.createElement('tr');
+                tr.className = classe;
+                tr.innerHTML = `
+                    <td>${new Date(r.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                    <td>${r.cod_produto}</td>
+                    <td><strong>${r.cod_peca}</strong></td>
+                    <td>${r.origem_defeito||'-'}</td>
+                    <td>${r.nf}</td>
+                    <td>${r.qtd}</td>
+                    <td title="${r.nao_conforme}">${r.nao_conforme.substring(0,35)}...</td>
+                    <td><span class="badge-dias ${badge}">${dias}d</span></td>
+                    <td>
+                        <button class="btn-aprovar" onclick="aprovarRNC('${r.id}')">✓ Aprovar</button>
+                        <button class="btn-reprovar" onclick="reprovarRNC('${r.id}')">✗ Reprovar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function diasAberta(dataStr) {
+            return Math.floor((new Date() - new Date(dataStr)) / (1000*60*60*24));
+        }
+
+        window.aprovarRNC = async function(id) {
+            if (!confirm('Confirma aprovação desta RNC?\nEla será fechada.')) return;
+            try {
+                await update(ref(db, `rncs/${id}`), {
+                    status: 'Fechada',
+                    aprovado_por: 'QUALIDADE',
+                    data_aprovacao: new Date().toISOString()
+                });
+                alert('RNC aprovada e fechada!');
+            } catch (e) {
+                alert('Erro: ' + e.message);
+            }
+        }
+
+        window.reprovarRNC = async function(id) {
+            const motivo = prompt('Motivo da reprovação:\n(Será enviado ao inspetor)');
+            if (!motivo) return;
+            try {
+                await update(ref(db, `rncs/${id}`), {
+                    status: 'Aberta',
+                    observacao_qualidade: motivo,
+                    reprovado_por: 'QUALIDADE',
+                    data_reprovacao: new Date().toISOString()
+                });
+                alert('RNC reprovada. Inspetor será notificado.');
+            } catch (e) {
+                alert('Erro: ' + e.message);
+            }
+        }
+
+        window.filtrarQualidade = function() {
+            const termo = document.getElementById('buscaQualidade').value.toLowerCase();
+            const filtradas = rncsAbertas.filter(r =>
+                r.nf.toLowerCase().includes(termo) ||
+                r.cod_peca.toLowerCase().includes(termo) ||
+                r.cod_produto.toLowerCase().includes(termo) ||
+                r.nao_conforme.toLowerCase().includes(termo)
+            );
+            renderizarQualidade(filtradas);
         }
     </script>
 </body>
