@@ -3,58 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema RNC - Elgin v8 Online</title>
+    <title>Sistema RNC - Elgin v9 Online</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-   .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-   .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+       .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+       .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-   .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.3); text-decoration: none; display: inline-block; }
-   .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+       .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 8px rgba(102,126,234,0.3); text-decoration: none; display: inline-block; }
+       .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-   .content { padding: 20px; }
-   .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-   .form-group { display: flex; flex-direction: column; }
-   .form-group.full { grid-column: 1 / -1; }
+       .content { padding: 20px; }
+       .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+       .form-group { display: flex; flex-direction: column; }
+       .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-   .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+       .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-   .btn-salvar { background: #28a745; color: white; }
-   .btn-salvar:hover:not(:disabled) { background: #218838; }
-   .btn-limpar { background: #6c757d; color: white; }
-   .btn-excel { background: #217346; color: #fff; }
-   .btn-export-pecas { background: #17a2b8; color: #fff; }
-   .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-   .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-   .status-online { color: #2e7d32; font-weight: bold; }
-   .tabela-container { overflow-x: auto; margin-top: 20px; }
+       .btn-salvar { background: #28a745; color: white; }
+       .btn-salvar:hover:not(:disabled) { background: #218838; }
+       .btn-limpar { background: #6c757d; color: white; }
+       .btn-excel { background: #217346; color: #fff; }
+       .btn-export-pecas { background: #17a2b8; color: #fff; }
+       .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+       .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+       .status-online { color: #2e7d32; font-weight: bold; }
+       .status-erro { color: #d32f2f; font-weight: bold; }
+       .tabela-container { overflow-x: auto; margin-top: 20px; }
+       .tabela-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+       .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-   .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-   .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-   .loading { text-align: center; padding: 20px; color: #666; }
-        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
+       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+       .loading { text-align: center; padding: 20px; color: #666; }
+       .input-ok { background-color: #e8f5e9!important; }
+       .input-warn { background-color: #fff3cd!important; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }.tabela-header { flex-direction: column; align-items: stretch; }.busca-input { width: 100%; } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header-bar">
-            <h1>Sistema de Cadastro RNC - Elgin v8 Online</h1>
+            <h1>Sistema de Cadastro RNC - Elgin v9 Online</h1>
             <a href="dashboard.html" target="_blank" class="btn-dashboard">📊 Ver Dashboard</a>
         </div>
 
         <div class="content">
             <div class="status-box">
-                <span id="statusPecas">Carregando...</span>
-                <span class="status-online">● Online - Firebase</span>
+                <span id="statusPecas">Conectando...</span>
+                <span class="status-online">● Online - Firebase nc-versao2</span>
             </div>
 
             <h2>1. Importar Lista de Peças</h2>
@@ -156,6 +161,10 @@
             </form>
 
             <h2>3. RNCs Cadastradas</h2>
+            <div class="tabela-header">
+                <input type="text" id="busca" class="busca-input" placeholder="Buscar por NF, Código Peça, Produto..." oninput="filtrarTabela()">
+                <span id="contadorRNCs"></span>
+            </div>
             <div class="tabela-container">
                 <table id="tabelaRNC">
                     <thead>
@@ -171,25 +180,29 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc, query, orderBy, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
         import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
 
         const firebaseConfig = {
-          apiKey: "AIzaSyD0Hgk43ItDuyVRetnkWx7N7XoXStbnDvk",
-          authDomain: "rnc-elgin.firebaseapp.com",
-          projectId: "rnc-elgin",
-          storageBucket: "rnc-elgin.firebasestorage.app",
-          messagingSenderId: "75312642711",
-          appId: "1:75312642711:web:ae55732315738ca6ac87d2",
-          measurementId: "G-3Z7JMC88KM"
+          apiKey: "AIzaSyCSdAsEHqgjAhHFcNn0xX4IwtA2GZ7-u-Y",
+          authDomain: "nc-versao2.firebaseapp.com",
+          databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
+          projectId: "nc-versao2",
+          storageBucket: "nc-versao2.firebasestorage.app",
+          messagingSenderId: "584567247229",
+          appId: "1:584567247229:web:9c397236f3e08cc3247c14",
+          measurementId: "G-F9HFPQ07K2"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const analytics = getAnalytics(app);
 
         let pecasDB = {};
         let pecasTempDB = {};
         let listaPecasSalva = false;
+        let todasRNCs = [];
 
         document.addEventListener('DOMContentLoaded', async function() {
             document.getElementById('data').valueAsDate = new Date();
@@ -198,13 +211,19 @@
         });
 
         async function carregarPecasDoFirebase() {
-            const querySnapshot = await getDocs(collection(db, "pecas"));
-            pecasDB = {};
-            querySnapshot.forEach((doc) => {
-                pecasDB[doc.data().codigo] = doc.data().denominacao;
-            });
-            listaPecasSalva = Object.keys(pecasDB).length > 0;
-            atualizarStatusPecas();
+            try {
+                document.getElementById('statusPecas').innerHTML = 'Conectando ao Firebase...';
+                const querySnapshot = await getDocs(collection(db, "pecas"));
+                pecasDB = {};
+                querySnapshot.forEach((doc) => {
+                    pecasDB[doc.data().codigo] = doc.data().denominacao;
+                });
+                listaPecasSalva = Object.keys(pecasDB).length > 0;
+                atualizarStatusPecas();
+            } catch (e) {
+                document.getElementById('statusPecas').innerHTML = `<span class="status-erro">Erro ao conectar: ${e.message}</span>`;
+                console.error(e);
+            }
         }
 
         function atualizarStatusPecas() {
@@ -242,26 +261,27 @@
             const btn = document.getElementById('btnSalvarLista');
             btn.disabled = true;
             btn.innerText = 'Enviando...';
-
-            const batch = writeBatch(db);
-            const pecasRef = collection(db, "pecas");
-
-            for (let codigo in pecasTempDB) {
-                const newDocRef = doc(pecasRef);
-                batch.set(newDocRef, {
-                    codigo: codigo,
-                    denominacao: pecasTempDB[codigo],
-                    criado_em: new Date().toISOString()
-                });
+            try {
+                const batch = writeBatch(db);
+                for (let codigo in pecasTempDB) {
+                    const docRef = doc(db, "pecas", codigo); // Usa código como ID pra não duplicar
+                    batch.set(docRef, {
+                        codigo: codigo,
+                        denominacao: pecasTempDB[codigo],
+                        criado_em: new Date().toISOString()
+                    }, {merge: true});
+                }
+                await batch.commit();
+                pecasDB = {...pecasDB,...pecasTempDB};
+                pecasTempDB = {};
+                listaPecasSalva = true;
+                atualizarStatusPecas();
+                alert('Lista de peças salva no Firebase!');
+            } catch (e) {
+                alert('Erro ao salvar: ' + e.message);
+            } finally {
+                btn.innerText = '💾 Salvar Lista no Firebase';
             }
-
-            await batch.commit();
-            pecasDB = {...pecasDB,...pecasTempDB};
-            pecasTempDB = {};
-            listaPecasSalva = true;
-            atualizarStatusPecas();
-            btn.innerText = '💾 Salvar Lista no Firebase';
-            alert('Lista de peças salva no Firebase!');
         }
 
         window.exportarListaPecas = function() {
@@ -279,18 +299,20 @@
             const codigo = this.value.trim().toUpperCase();
             const novaPecaBox = document.getElementById('nova_peca_box');
             const inputDenom = document.getElementById('denominacao');
-            const db = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
-            if (db[codigo]) {
-                inputDenom.value = db[codigo];
-                inputDenom.style.backgroundColor = '#e8f5e9';
+            const dbPecas = Object.keys(pecasTempDB).length > 0? pecasTempDB : pecasDB;
+            if (dbPecas[codigo]) {
+                inputDenom.value = dbPecas[codigo];
+                inputDenom.classList.add('input-ok');
+                inputDenom.classList.remove('input-warn');
                 novaPecaBox.style.display = 'none';
             } else if (codigo!== '') {
                 inputDenom.value = '';
                 inputDenom.placeholder = 'Código não encontrado';
-                inputDenom.style.backgroundColor = '#fff3cd';
+                inputDenom.classList.add('input-warn');
+                inputDenom.classList.remove('input-ok');
                 novaPecaBox.style.display = 'block';
             } else {
-                inputDenom.style.backgroundColor = '#fff';
+                inputDenom.classList.remove('input-ok', 'input-warn');
                 novaPecaBox.style.display = 'none';
             }
         });
@@ -299,22 +321,25 @@
             const codigo = document.getElementById('codigo_peca').value.trim().toUpperCase();
             const denom = document.getElementById('nova_denominacao').value.trim();
             if (!codigo ||!denom) { alert('Preencha o código e a denominação!'); return; }
-
-            await addDoc(collection(db, "pecas"), { codigo: codigo, denominacao: denom });
-            pecasDB[codigo] = denom;
-            document.getElementById('denominacao').value = denom;
-            document.getElementById('denominacao').style.backgroundColor = '#e8f5e9';
-            document.getElementById('nova_peca_box').style.display = 'none';
-            document.getElementById('nova_denominacao').value = '';
-            atualizarStatusPecas();
-            alert('Peça ' + codigo + ' cadastrada no Firebase!');
+            try {
+                await setDoc(doc(db, "pecas", codigo), { codigo, denominacao: denom, criado_em: new Date().toISOString() });
+                pecasDB[codigo] = denom;
+                document.getElementById('denominacao').value = denom;
+                document.getElementById('denominacao').classList.add('input-ok');
+                document.getElementById('nova_peca_box').style.display = 'none';
+                document.getElementById('nova_denominacao').value = '';
+                atualizarStatusPecas();
+                alert('Peça ' + codigo + ' cadastrada no Firebase!');
+            } catch (e) {
+                alert('Erro: ' + e.message);
+            }
         }
 
         window.cancelarNovaPeca = function() {
             document.getElementById('nova_peca_box').style.display = 'none';
             document.getElementById('codigo_peca').value = '';
             document.getElementById('denominacao').value = '';
-            document.getElementById('denominacao').style.backgroundColor = '#fff';
+            document.getElementById('denominacao').classList.remove('input-ok', 'input-warn');
         }
 
         document.getElementById('formRNC').addEventListener('submit', async function(e) {
@@ -322,7 +347,7 @@
             const editId = document.getElementById('editId').value;
             const rnc = {
                 cod_produto: document.getElementById('cod_produto').value,
-                cod_peca: document.getElementById('codigo_peca').value,
+                cod_peca: document.getElementById('codigo_peca').value.toUpperCase(),
                 denominacao: document.getElementById('denominacao').value,
                 origem_defeito: document.getElementById('origem_defeito').value,
                 fornecedor: document.getElementById('fornecedor').value,
@@ -338,30 +363,48 @@
                 criado_em: new Date().toISOString()
             };
 
-            if (editId) {
-                await updateDoc(doc(db, "rncs", editId), rnc);
-                alert('RNC atualizada no Firebase!');
-            } else {
-                await addDoc(collection(db, "rncs"), rnc);
-                alert('RNC cadastrada no Firebase!');
+            try {
+                if (editId) {
+                    await updateDoc(doc(db, "rncs", editId), rnc);
+                    alert('RNC atualizada no Firebase!');
+                    logEvent(analytics, 'rnc_editada');
+                } else {
+                    await addDoc(collection(db, "rncs"), rnc);
+                    alert('RNC cadastrada no Firebase!');
+                    logEvent(analytics, 'rnc_criada', {origem: rnc.origem_defeito});
+                }
+                limparForm();
+                await carregarTabelaRNCs();
+            } catch (e) {
+                alert('Erro ao salvar: ' + e.message);
             }
-            limparForm();
-            await carregarTabelaRNCs();
         });
 
         async function carregarTabelaRNCs() {
-            const q = query(collection(db, "rncs"), orderBy("data", "desc"));
-            const querySnapshot = await getDocs(q);
+            try {
+                const q = query(collection(db, "rncs"), orderBy("data", "desc"));
+                const querySnapshot = await getDocs(q);
+                todasRNCs = [];
+                querySnapshot.forEach((docSnap) => {
+                    todasRNCs.push({id: docSnap.id,...docSnap.data()});
+                });
+                renderizarTabela(todasRNCs);
+            } catch (e) {
+                document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="11" class="loading status-erro">Erro: ${e.message}</td></tr>`;
+            }
+        }
+
+        function renderizarTabela(lista) {
             const tbody = document.getElementById('tabelaBody');
             tbody.innerHTML = '';
+            document.getElementById('contadorRNCs').innerText = `${lista.length} RNCs encontradas`;
 
-            if (querySnapshot.empty) {
-                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC cadastrada ainda.</td></tr>';
+            if (lista.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="11" class="loading">Nenhuma RNC encontrada.</td></tr>';
                 return;
             }
 
-            querySnapshot.forEach((docSnap) => {
-                const rnc = {id: docSnap.id,...docSnap.data()};
+            lista.forEach((rnc) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${rnc.id.slice(-6)}</td>
@@ -384,10 +427,20 @@
             });
         }
 
+        window.filtrarTabela = function() {
+            const termo = document.getElementById('busca').value.toLowerCase();
+            const filtradas = todasRNCs.filter(r =>
+                r.nf.toLowerCase().includes(termo) ||
+                r.cod_peca.toLowerCase().includes(termo) ||
+                r.cod_produto.toLowerCase().includes(termo) ||
+                r.nao_conforme.toLowerCase().includes(termo)
+            );
+            renderizarTabela(filtradas);
+        }
+
         window.editarRNC = async function(id) {
             const docRef = doc(db, "rncs", id);
             const docSnap = await getDoc(docRef);
-
             if (docSnap.exists()) {
                 const rnc = {id: docSnap.id,...docSnap.data()};
                 document.getElementById('editId').value = rnc.id;
@@ -411,8 +464,13 @@
 
         window.excluirRNC = async function(id) {
             if (confirm('Tem certeza que deseja excluir esta RNC?')) {
-                await deleteDoc(doc(db, "rncs", id));
-                await carregarTabelaRNCs();
+                try {
+                    await deleteDoc(doc(db, "rncs", id));
+                    await carregarTabelaRNCs();
+                    logEvent(analytics, 'rnc_excluida');
+                } catch (e) {
+                    alert('Erro ao excluir: ' + e.message);
+                }
             }
         }
 
@@ -420,16 +478,30 @@
             document.getElementById('formRNC').reset();
             document.getElementById('editId').value = '';
             document.getElementById('data').valueAsDate = new Date();
-            document.getElementById('denominacao').style.backgroundColor = '#f5f5f5';
+            document.getElementById('denominacao').classList.remove('input-ok', 'input-warn');
             document.getElementById('nova_peca_box').style.display = 'none';
         }
 
         window.exportarExcelRNCs = async function() {
-            const querySnapshot = await getDocs(collection(db, "rncs"));
-            const rncs = [];
-            querySnapshot.forEach((doc) => rncs.push({ID: doc.id,...doc.data()}));
-            if (rncs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
-            const ws = XLSX.utils.json_to_sheet(rncs);
+            if (todasRNCs.length === 0) { alert('Nenhuma RNC cadastrada!'); return; }
+            const dados = todasRNCs.map(r => ({
+                ID: r.id,
+                Data: r.data,
+                'Cód. Produto': r.cod_produto,
+                'Cód. Peça': r.cod_peca,
+                Denominação: r.denominacao,
+                Origem: r.origem_defeito,
+                Fornecedor: r.fornecedor,
+                NF: r.nf,
+                QTD: r.qtd,
+                Reserva: r.reserva,
+                Inspetor: r.visto,
+                Operador: r.visto_operador,
+                Status: r.status,
+                'Não Conformidade': r.nao_conforme,
+                'Ação Corretiva': r.acao_corretiva
+            }));
+            const ws = XLSX.utils.json_to_sheet(dados);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'RNCs');
             XLSX.writeFile(wb, 'RNCs_Elgin.xlsx');
@@ -444,6 +516,7 @@
                 const win = window.open('', '_blank', 'width=400,height=300');
                 win.document.write(etiquetaHTML);
                 win.document.close();
+                logEvent(analytics, 'etiqueta_impressa');
             }
         }
 
@@ -464,7 +537,7 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
 <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
 <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
-<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || ''}</span></div>
+<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
 <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
 <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
 <div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
