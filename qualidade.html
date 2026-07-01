@@ -3,77 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tela da Qualidade - RNC Elgin</title>
+    <title>Tela Qualidade - Elgin</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f2f5; padding: 20px; }
-       .container { max-width: 1600px; margin: 0 auto; }
-       .header { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 25px; border-radius: 10px; margin-bottom: 20px; }
-        h1 { font-size: 26px; }
-       .voltar { display: inline-block; margin: 15px 0; padding: 8px 16px; background: #6c757d; color: white; text-decoration: none; border-radius: 5px; }
-       .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-left: 4px solid; }
-       .card.vermelho { border-color: #dc3545; }
-       .card.laranja { border-color: #fd7e14; }
-       .card.roxo { border-color: #6f42c1; }
-       .card-num { font-size: 36px; font-weight: bold; }
-       .card-label { font-size: 12px; color: #666; text-transform: uppercase; margin-top: 5px; }
-       .busca { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 15px; font-size: 14px; }
-       .tabela-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
-        th { background: #f8f9fa; font-weight: 600; position: sticky; top: 0; }
-        tr:hover { background: #f8f9fa; }
-       .btn-aprovar { background: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; }
-       .btn-reprovar { background: #dc3545; color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; }
-       .btn-aprovar:hover { background: #218838; }
-       .btn-reprovar:hover { background: #c82333; }
-       .dias-alerta { font-weight: bold; color: #dc3545; }
-       .loading { text-align: center; padding: 40px; color: #999; }
-        @media (max-width: 768px) {.cards { grid-template-columns: 1fr; }}
+        body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+      .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #28a745; }
+        h1 { color: #28a745; margin: 0; font-size: 24px; }
+      .btn-voltar { background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-voltar:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(108,117,125,0.4); }
+        h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
+      .content { padding: 20px; }
+      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+      .form-group { display: flex; flex-direction: column; }
+      .form-group.full { grid-column: 1 / -1; }
+        label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
+        input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: #28a745; }
+        textarea { resize: vertical; }
+      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+      .btn-salvar { background: #28a745; color: white; }
+      .btn-salvar:hover { background: #218838; }
+      .btn-limpar { background: #6c757d; color: white; }
+        @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>✅ Tela da Qualidade</h1>
-            <div>Aprovação de RNCs - Banco nc-versao2</div>
+        <div class="header-bar">
+            <h1>Tela Qualidade - Análise RNC</h1>
+            <a href="index.html" class="btn-voltar">← Voltar para RNC</a>
         </div>
 
-        <a href="index.html" class="voltar">← Voltar ao Cadastro</a>
-
-        <div class="cards">
-            <div class="card vermelho">
-                <div class="card-num" id="qtdAbertas">0</div>
-                <div class="card-label">RNCs Abertas</div>
-            </div>
-            <div class="card laranja">
-                <div class="card-num" id="qtd7dias">0</div>
-                <div class="card-label">Acima de 7 Dias</div>
-            </div>
-            <div class="card roxo">
-                <div class="card-num" id="qtdCriticas">0</div>
-                <div class="card-label">Críticas</div>
-            </div>
-        </div>
-
-        <input type="text" id="busca" class="busca" placeholder="Buscar por NF, Peça ou Produto..." oninput="filtrar()">
-
-        <div class="tabela-box">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Data</th><th>Produto</th><th>Peça</th><th>Denominação</th><th>Origem</th><th>NF</th><th>QTD</th><th>Não Conformidade</th><th>Dias</th><th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="tbody"><tr><td colspan="10" class="loading">Carregando RNCs...</td></tr></tbody>
-            </table>
+        <div class="content">
+            <h2>Análise de Não Conformidade</h2>
+            <form id="formQualidade">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_rnc">ID RNC *</label>
+                        <input type="text" id="id_rnc" required placeholder="Cole o ID da RNC">
+                    </div>
+                    <div class="form-group">
+                        <label for="analista">ANALISTA RESPONSÁVEL *</label>
+                        <input type="text" id="analista" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="data_analise">DATA ANÁLISE *</label>
+                        <input type="date" id="data_analise" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="disposicao">DISPOSIÇÃO *</label>
+                        <select id="disposicao" required>
+                            <option value="">Selecione...</option>
+                            <option value="REFUGO">REFUGO</option>
+                            <option value="CONSERTO">CONSERTO</option>
+                            <option value="SCRAP">SCRAP</option>
+                            <option value="ANALISE">ANÁLISE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="custo_estimado">CUSTO ESTIMADO R$</label>
+                        <input type="number" id="custo_estimado" step="0.01" min="0" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="prazo">PRAZO PARA RESOLUÇÃO</label>
+                        <input type="date" id="prazo">
+                    </div>
+                    <div class="form-group full">
+                        <label for="causa_raiz">CAUSA RAIZ IDENTIFICADA *</label>
+                        <textarea id="causa_raiz" rows="3" required placeholder="Descreva a causa raiz da não conformidade"></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label for="plano_acao">PLANO DE AÇÃO *</label>
+                        <textarea id="plano_acao" rows="3" required placeholder="Descreva as ações que serão tomadas"></textarea>
+                    </div>
+                    <div class="form-group full">
+                        <label for="observacoes">OBSERVAÇÕES</label>
+                        <textarea id="observacoes" rows="2" placeholder="Observações adicionais"></textarea>
+                    </div>
+                </div>
+                <div class="botoes">
+                    <button type="submit" class="btn-salvar">SALVAR ANÁLISE</button>
+                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, push, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCSdAsEHqgjAhHFcNn0xX4IwtA2GZ7-u-Y",
@@ -82,85 +102,51 @@
           projectId: "nc-versao2",
           storageBucket: "nc-versao2.firebasestorage.app",
           messagingSenderId: "584567247229",
-          appId: "1:584567247229:web:9c397236f3e08cc3247c14"
+          appId: "1:584567247229:web:9c397236f3e08cc3247c14",
+          measurementId: "G-F9HFPQ07K2"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let rncsAbertas = [];
 
-        onValue(ref(db, 'rncs'), (snap) => {
-            const todas = snap.exists()? Object.entries(snap.val()).map(([id,d])=>({id,...d})) : [];
-            rncsAbertas = todas.filter(r => r.status === 'Aberta');
-            renderizar(rncsAbertas);
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('data_analise').valueAsDate = new Date();
         });
 
-        function renderizar(lista) {
-            // Cards
-            document.getElementById('qtdAbertas').innerText = lista.length;
-            const hoje = new Date();
-            const mais7 = lista.filter(r => (hoje - new Date(r.data)) / (1000*60*60*24) > 7).length;
-            document.getElementById('qtd7dias').innerText = mais7;
-            document.getElementById('qtdCriticas').innerText = lista.filter(r => r.origem_defeito === 'Fornecedor' && r.qtd > 100).length;
+        document.getElementById('formQualidade').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const analise = {
+                id_rnc: document.getElementById('id_rnc').value,
+                analista: document.getElementById('analista').value,
+                data_analise: document.getElementById('data_analise').value,
+                disposicao: document.getElementById('disposicao').value,
+                custo_estimado: Number(document.getElementById('custo_estimado').value) || 0,
+                prazo: document.getElementById('prazo').value,
+                causa_raiz: document.getElementById('causa_raiz').value,
+                plano_acao: document.getElementById('plano_acao').value,
+                observacoes: document.getElementById('observacoes').value,
+                criado_em: new Date().toISOString()
+            };
 
-            // Tabela
-            const tbody = document.getElementById('tbody');
-            tbody.innerHTML = '';
-            if (lista.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="loading">Nenhuma RNC aberta 🎉</td></tr>';
-                return;
+            try {
+                await push(ref(db, 'analises_qualidade'), analise);
+                alert('Análise salva com sucesso!');
+                limparForm();
+            } catch (e) {
+                alert('Erro ao salvar: ' + e.message);
             }
-            lista.sort((a,b) => new Date(a.data) - new Date(b.data)).forEach(r => {
-                const dias = Math.floor((hoje - new Date(r.data)) / (1000*60*60*24));
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${new Date(r.data+'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                        <td>${r.cod_produto}</td>
-                        <td>${r.cod_peca}</td>
-                        <td>${r.denominacao}</td>
-                        <td>${r.origem_defeito}</td>
-                        <td>${r.nf}</td>
-                        <td>${r.qtd}</td>
-                        <td title="${r.nao_conforme}">${r.nao_conforme.substring(0,30)}...</td>
-                        <td class="${dias>7?'dias-alerta':''}">${dias}d</td>
-                        <td>
-                            <button class="btn-aprovar" onclick="aprovar('${r.id}')">✓ Aprovar</button>
-                            <button class="btn-reprovar" onclick="reprovar('${r.id}')">✗ Reprovar</button>
-                        </td>
-                    </tr>
-                `;
-            });
+        });
+
+        window.limparForm = function() {
+            document.getElementById('formQualidade').reset();
+            document.getElementById('data_analise').valueAsDate = new Date();
         }
 
-        window.aprovar = async function(id) {
-            if (!confirm('Aprovar esta RNC?')) return;
-            await update(ref(db, `rncs/${id}`), {
-                status: 'Fechada',
-                aprovado_por: 'QUALIDADE',
-                data_aprovacao: new Date().toISOString()
-            });
-            alert('RNC aprovada com sucesso!');
-        }
-
-        window.reprovar = async function(id) {
-            const motivo = prompt('Motivo da reprovação:');
-            if (!motivo) return;
-            await update(ref(db, `rncs/${id}`), {
-                observacao_qualidade: motivo,
-                reprovado_por: 'QUALIDADE',
-                data_reprovacao: new Date().toISOString()
-            });
-            alert('RNC reprovada. Inspetor será notificado.');
-        }
-
-        window.filtrar = function() {
-            const termo = document.getElementById('busca').value.toLowerCase();
-            const filtradas = rncsAbertas.filter(r => 
-                r.nf.toLowerCase().includes(termo) ||
-                r.cod_peca.toLowerCase().includes(termo) ||
-                r.cod_produto.toLowerCase().includes(termo)
-            );
-            renderizar(filtradas);
+        // Pega ID da RNC pela URL se vier da tela principal
+        const urlParams = new URLSearchParams(window.location.search);
+        const rncId = urlParams.get('rnc');
+        if (rncId) {
+            document.getElementById('id_rnc').value = rncId;
         }
     </script>
 </body>
