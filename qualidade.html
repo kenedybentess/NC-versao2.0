@@ -42,35 +42,33 @@
         .historico-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .historico h2 { color: #28a745; margin: 0; }
         .contador { font-size: 14px; color: #6c757d; }
-        
-        /* Card RNC */
-        .card-rnc { margin-bottom: 20px; border: 2px solid #007bff; border-radius: 8px; overflow: hidden; }
-        .card-rnc-header { background: #007bff; color: white; padding: 15px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; font-size: 14px; }
-        .card-rnc-header strong { display: block; font-size: 11px; opacity: 0.9; margin-bottom: 3px; }
-        .card-rnc-body { padding: 15px; background: #f8f9fa; }
-        .card-rnc-body h4 { color: #28a745; margin-bottom: 10px; font-size: 14px; }
-        
-        .tabela-analises { width: 100%; border-collapse: collapse; font-size: 13px; background: white; }
-        .tabela-analises th { background: #28a745; color: white; padding: 10px 8px; text-align: left; font-size: 12px; }
-        .tabela-analises td { padding: 8px; border-bottom: 1px solid #ddd; }
-        .tabela-analises tr:hover { background: #f8f9fa; }
-        
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; display: inline-block; }
+        .tabela-wrapper { overflow-x: auto; border: 1px solid #dee2e6; border-radius: 4px; }
+        .tabela-historico { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1400px; }
+        .tabela-historico th { background: #007bff; color: white; padding: 12px 8px; text-align: left; font-size: 12px; position: sticky; top: 0; z-index: 10; white-space: nowrap; }
+        .tabela-historico td { padding: 10px 8px; border-bottom: 1px solid #ddd; vertical-align: top; }
+        .tabela-historico tr:hover { background: #f8f9fa; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; color: white; display: inline-block; white-space: nowrap; }
         .badge-refugo { background: #dc3545; }
         .badge-conserto { background: #ffc107; color: #000; }
         .badge-scrap { background: #6c757d; }
         .badge-analise { background: #17a2b8; }
         .badge-status { background: #007bff; }
+        .btn-detalhes { background: #007bff; color: white; padding: 6px 12px; font-size: 11px; }
+        .detalhes-expandidos { background: #f8f9fa; padding: 15px; border-radius: 4px; display: none; }
+        .detalhes-expandidos strong { color: #28a745; display: block; margin-top: 10px; }
+        .detalhes-expandidos strong:first-child { margin-top: 0; }
         .sem-registros { text-align: center; padding: 30px; color: #6c757d; }
+        .id-col { font-family: monospace; font-size: 11px; color: #6c757d; }
+        .text-wrap { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         @media (max-width: 1024px) { 
-            .filtros-grid, .card-rnc-header { grid-template-columns: repeat(2, 1fr); } 
+            .filtros-grid { grid-template-columns: repeat(2, 1fr); } 
         }
         @media (max-width: 768px) {
-            .form-grid, .filtros-grid, .card-rnc-header { grid-template-columns: 1fr; }
+            .form-grid, .filtros-grid { grid-template-columns: 1fr; }
             .header-bar { flex-direction: column; gap: 10px; } 
             .historico-header { flex-direction: column; align-items: flex-start; gap: 10px; }
-            .tabela-analises { font-size: 11px; }
+            .tabela-historico { font-size: 11px; }
         }
     </style>
 </head>
@@ -157,18 +155,20 @@
                 </div>
             </div>
 
-            <!-- HISTÓRICO JUNTANDO RNC + ANÁLISES -->
+            <!-- HISTÓRICO COMPLETO -->
             <div class="historico">
                 <div class="historico-header">
-                    <h2>RNCs com Análises de Qualidade</h2>
+                    <h2>Histórico Completo de Análises</h2>
                     <div>
-                        <span class="contador" id="contadorRegistros">0 RNCs</span>
+                        <span class="contador" id="contadorRegistros">0 registros</span>
                         <button class="btn-exportar" onclick="exportarExcel()" style="margin-left: 15px;">📊 Exportar Excel</button>
                     </div>
                 </div>
                 
-                <div id="listaRncs">
-                    <p class="sem-registros">Carregando...</p>
+                <div class="tabela-wrapper">
+                    <div id="tabelaHistorico">
+                        <p class="sem-registros">Carregando...</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -191,13 +191,13 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let todosRncs = [];
         let todasAnalises = [];
         let dadosFiltrados = [];
+        let cacheRncs = {};
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('data_analise').valueAsDate = new Date();
-            carregarDados();
+            carregarHistorico();
         });
 
         document.getElementById('formQualidade').addEventListener('submit', async function(e) {
@@ -218,7 +218,7 @@
             try {
                 await push(ref(db, 'analises_qualidade'), analise);
                 alert('Análise salva com sucesso!');
-                carregarDados();
+                carregarHistorico();
                 limparForm();
             } catch (e) {
                 alert('Erro ao salvar: ' + e.message);
@@ -230,113 +230,64 @@
             document.getElementById('data_analise').valueAsDate = new Date();
         }
 
-        // Carrega RNCs + Análises e junta tudo
-        async function carregarDados() {
-            const listaDiv = document.getElementById('listaRncs');
-            listaDiv.innerHTML = '<p class="sem-registros">Carregando...</p>';
+        // Busca dados do RNC
+        async function buscarDadosRnc(idRnc) {
+            if (cacheRncs[idRnc]) return cacheRncs[idRnc];
             
             try {
-                // 1. Busca todos os RNCs
-                const snapRncs = await get(ref(db, 'rncs'));
-                todosRncs = [];
-                if (snapRncs.exists()) {
-                    snapRncs.forEach(child => {
-                        todosRncs.push({ key: child.key, ...child.val() });
-                    });
+                const q = query(ref(db, 'rncs'), orderByChild('id'), equalTo(idRnc));
+                const snap = await get(q);
+                if (snap.exists()) {
+                    let dados = null;
+                    snap.forEach(child => { dados = child.val(); });
+                    cacheRncs[idRnc] = dados;
+                    return dados;
                 }
-
-                // 2. Busca todas as análises
-                const snapAnalises = await get(ref(db, 'analises_qualidade'));
-                todasAnalises = [];
-                if (snapAnalises.exists()) {
-                    snapAnalises.forEach(child => {
-                        todasAnalises.push({ key: child.key, ...child.val() });
-                    });
-                }
-
-                // 3. Junta: para cada RNC, anexa suas análises
-                dadosFiltrados = todosRncs.map(rnc => {
-                    const analisesDoRnc = todasAnalises.filter(a => a.id_rnc === rnc.id);
-                    return { ...rnc, analises: analisesDoRnc };
-                }).filter(rnc => rnc.analises.length > 0); // Só mostra RNCs que têm análise
-
-                renderizarRncs(dadosFiltrados);
-
             } catch (e) {
-                listaDiv.innerHTML = `<p class="sem-registros">Erro ao carregar: ${e.message}</p>`;
-                console.error(e);
+                console.error('Erro ao buscar RNC:', e);
             }
+            return null;
         }
 
-        function renderizarRncs(rncs) {
-            const listaDiv = document.getElementById('listaRncs');
-            atualizarContador(rncs.length);
+        // Carrega TODAS as análises e junta com dados do RNC
+        async function carregarHistorico() {
+            const tabelaDiv = document.getElementById('tabelaHistorico');
+            tabelaDiv.innerHTML = '<p class="sem-registros">Carregando...</p>';
             
-            if (rncs.length === 0) {
-                listaDiv.innerHTML = '<p class="sem-registros">Nenhum RNC com análise encontrado</p>';
-                return;
-            }
+            try {
+                const snapshot = await get(ref(db, 'analises_qualidade'));
+                
+                if (!snapshot.exists()) {
+                    tabelaDiv.innerHTML = '<p class="sem-registros">Nenhuma análise cadastrada</p>';
+                    todasAnalises = [];
+                    atualizarContador(0);
+                    return;
+                }
 
-            let html = '';
-            rncs.forEach(rnc => {
-                const dataRnc = rnc.data ? new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                
-                html += `
-                    <div class="card-rnc">
-                        <div class="card-rnc-header">
-                            <div><strong>ID</strong>${rnc.id || '-'}</div>
-                            <div><strong>Data</strong>${dataRnc}</div>
-                            <div><strong>Cód. Produto</strong>${rnc.cod_produto || '-'}</div>
-                            <div><strong>Cód. Peça</strong>${rnc.cod_peca || '-'}</div>
-                            <div><strong>Origem</strong>${rnc.origem_defeito || '-'}</div>
-                            <div><strong>NF</strong>${rnc.nf || '-'}</div>
-                            <div><strong>QTD</strong>${rnc.qtd || '-'}</div>
-                            <div><strong>Não Conforme</strong>${rnc.nao_conforme || '-'}</div>
-                            <div><strong>Operador</strong>${rnc.visto_operador || '-'}</div>
-                            <div><strong>Status</strong><span class="badge badge-status">${rnc.status || 'Aberta'}</span></div>
-                        </div>
-                        <div class="card-rnc-body">
-                            <h4>Análises de Qualidade (${rnc.analises.length})</h4>
-                            <table class="tabela-analises">
-                                <thead>
-                                    <tr>
-                                        <th>Analista</th>
-                                        <th>Data</th>
-                                        <th>Disposição</th>
-                                        <th>Custo R$</th>
-                                        <th>Prazo</th>
-                                        <th>Causa Raiz</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                `;
-                
-                rnc.analises.forEach(a => {
-                    const dataAnalise = new Date(a.data_analise + 'T00:00:00').toLocaleDateString('pt-BR');
-                    const prazo = a.prazo ? new Date(a.prazo + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
-                    const badgeClass = `badge-${a.disposicao.toLowerCase()}`;
-                    
-                    html += `
-                        <tr>
-                            <td>${a.analista}</td>
-                            <td>${dataAnalise}</td>
-                            <td><span class="badge ${badgeClass}">${a.disposicao}</span></td>
-                            <td>R$ ${a.custo_estimado.toFixed(2)}</td>
-                            <td>${prazo}</td>
-                            <td>${a.causa_raiz.substring(0, 50)}${a.causa_raiz.length > 50 ? '...' : ''}</td>
-                        </tr>
-                    `;
+                // Carrega todas as análises
+                const analises = [];
+                snapshot.forEach(child => {
+                    analises.push({ key: child.key, ...child.val() });
                 });
-                
-                html += `
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                `;
-            });
 
-            listaDiv.innerHTML = html;
+                // Busca dados de TODOS os RNCs únicos
+                const idsRncs = [...new Set(analises.map(a => a.id_rnc))];
+                await Promise.all(idsRncs.map(id => buscarDadosRnc(id)));
+
+                // Junta análise + dados do RNC
+                todasAnalises = analises.map(a => ({
+                    ...a,
+                    rnc: cacheRncs[a.id_rnc] || {}
+                }));
+
+                todasAnalises.sort((a, b) => new Date(b.criado_em) - new Date(a.criado_em));
+                dadosFiltrados = [...todasAnalises];
+                renderizarTabela(dadosFiltrados);
+
+            } catch (e) {
+                tabelaDiv.innerHTML = `<p class="sem-registros">Erro ao carregar: ${e.message}</p>`;
+                console.error(e);
+            }
         }
 
         window.aplicarFiltro = function() {
@@ -344,31 +295,106 @@
             const inicio = document.getElementById('filtroDataInicio').value;
             const fim = document.getElementById('filtroDataFim').value;
             
-            dadosFiltrados = todosRncs.map(rnc => {
-                const analisesDoRnc = todasAnalises.filter(a => {
-                    let ok = a.id_rnc === rnc.id;
-                    if (inicio && a.data_analise < inicio) ok = false;
-                    if (fim && a.data_analise > fim) ok = false;
-                    return ok;
-                });
-                return { ...rnc, analises: analisesDoRnc };
-            }).filter(rnc => {
-                if (idRnc && !rnc.id.toLowerCase().includes(idRnc)) return false;
-                return rnc.analises.length > 0;
+            dadosFiltrados = todasAnalises.filter(d => {
+                let ok = true;
+                if (idRnc && !d.id_rnc.toLowerCase().includes(idRnc)) ok = false;
+                if (inicio && d.data_analise < inicio) ok = false;
+                if (fim && d.data_analise > fim) ok = false;
+                return ok;
             });
             
-            renderizarRncs(dadosFiltrados);
+            renderizarTabela(dadosFiltrados);
         }
 
         window.limparFiltro = function() {
             document.getElementById('filtroIdRnc').value = '';
             document.getElementById('filtroDataInicio').value = '';
             document.getElementById('filtroDataFim').value = '';
-            carregarDados();
+            dadosFiltrados = [...todasAnalises];
+            renderizarTabela(dadosFiltrados);
+        }
+
+        function renderizarTabela(dados) {
+            const tabelaDiv = document.getElementById('tabelaHistorico');
+            atualizarContador(dados.length);
+            
+            if (dados.length === 0) {
+                tabelaDiv.innerHTML = '<p class="sem-registros">Nenhum registro encontrado</p>';
+                return;
+            }
+
+            let html = `
+                <table class="tabela-historico">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Data</th>
+                            <th>Cód. Produto</th>
+                            <th>Cód. Peça</th>
+                            <th>Origem</th>
+                            <th>NF</th>
+                            <th>QTD</th>
+                            <th>Não Conformidade</th>
+                            <th>Operador</th>
+                            <th>Status RNC</th>
+                            <th>Analista</th>
+                            <th>Disposição</th>
+                            <th>Custo R$</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            dados.forEach((item, index) => {
+                const rnc = item.rnc || {};
+                const dataAnalise = new Date(item.data_analise + 'T00:00:00').toLocaleDateString('pt-BR');
+                const dataRnc = rnc.data ? new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
+                const badgeClass = `badge-${item.disposicao.toLowerCase()}`;
+                
+                html += `
+                    <tr>
+                        <td class="id-col">${item.id_rnc}</td>
+                        <td>${dataRnc}</td>
+                        <td>${rnc.cod_produto || '-'}</td>
+                        <td>${rnc.cod_peca || '-'}</td>
+                        <td>${rnc.origem_defeito || '-'}</td>
+                        <td>${rnc.nf || '-'}</td>
+                        <td>${rnc.qtd || '-'}</td>
+                        <td class="text-wrap" title="${rnc.nao_conforme || '-'}">${rnc.nao_conforme || '-'}</td>
+                        <td>${rnc.visto_operador || '-'}</td>
+                        <td><span class="badge badge-status">${rnc.status || '-'}</span></td>
+                        <td>${item.analista}</td>
+                        <td><span class="badge ${badgeClass}">${item.disposicao}</span></td>
+                        <td>R$ ${item.custo_estimado.toFixed(2)}</td>
+                        <td><button class="btn-detalhes" onclick="toggleDetalhes(${index})">Ver Detalhes</button></td>
+                    </tr>
+                    <tr id="detalhes-${index}" class="detalhes-expandidos">
+                        <td colspan="14">
+                            <strong>Denominação:</strong> ${rnc.denominacao || '-'}<br>
+                            <strong>Fornecedor:</strong> ${rnc.fornecedor || '-'}<br>
+                            <strong>Reserva:</strong> ${rnc.reserva || '-'}<br>
+                            <strong>Causa Raiz:</strong><br>${item.causa_raiz}<br>
+                            <strong>Plano de Ação:</strong><br>${item.plano_acao}<br>
+                            <strong>Observações:</strong><br>${item.observacoes || 'Nenhuma'}<br>
+                            <strong>Prazo:</strong> ${item.prazo ? new Date(item.prazo + 'T00:00:00').toLocaleDateString('pt-BR') : '-'}<br>
+                            <strong>Cadastrado em:</strong> ${new Date(item.criado_em).toLocaleString('pt-BR')}
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            tabelaDiv.innerHTML = html;
         }
 
         function atualizarContador(qtd) {
-            document.getElementById('contadorRegistros').textContent = `${qtd} RNC${qtd !== 1 ? 's' : ''}`;
+            document.getElementById('contadorRegistros').textContent = `${qtd} análise${qtd !== 1 ? 's' : ''}`;
+        }
+
+        window.toggleDetalhes = function(index) {
+            const el = document.getElementById(`detalhes-${index}`);
+            el.style.display = el.style.display === 'table-row' ? 'none' : 'table-row';
         }
 
         window.exportarExcel = function() {
@@ -377,31 +403,28 @@
                 return;
             }
             
-            const dados = [];
-            dadosFiltrados.forEach(rnc => {
-                rnc.analises.forEach(a => {
-                    dados.push({
-                        'ID RNC': rnc.id,
-                        'Data RNC': rnc.data,
-                        'Cód. Produto': rnc.cod_produto,
-                        'Cód. Peça': rnc.cod_peca,
-                        'Origem': rnc.origem_defeito,
-                        'NF': rnc.nf,
-                        'QTD': rnc.qtd,
-                        'Não Conforme': rnc.nao_conforme,
-                        'Operador': rnc.visto_operador,
-                        'Status RNC': rnc.status,
-                        'Analista': a.analista,
-                        'Data Análise': a.data_analise,
-                        'Disposição': a.disposicao,
-                        'Custo R$': a.custo_estimado,
-                        'Prazo': a.prazo || '',
-                        'Causa Raiz': a.causa_raiz,
-                        'Plano de Ação': a.plano_acao,
-                        'Observações': a.observacoes || ''
-                    });
-                });
-            });
+            const dados = dadosFiltrados.map(d => ({
+                'ID RNC': d.id_rnc,
+                'Data RNC': d.rnc.data || '',
+                'Cód. Produto': d.rnc.cod_produto || '',
+                'Cód. Peça': d.rnc.cod_peca || '',
+                'Denominação': d.rnc.denominacao || '',
+                'Origem Defeito': d.rnc.origem_defeito || '',
+                'NF': d.rnc.nf || '',
+                'QTD': d.rnc.qtd || '',
+                'Não Conforme': d.rnc.nao_conforme || '',
+                'Operador': d.rnc.visto_operador || '',
+                'Fornecedor': d.rnc.fornecedor || '',
+                'Status RNC': d.rnc.status || '',
+                'Analista': d.analista,
+                'Data Análise': d.data_analise,
+                'Disposição': d.disposicao,
+                'Custo R$': d.custo_estimado,
+                'Prazo': d.prazo || '',
+                'Causa Raiz': d.causa_raiz,
+                'Plano de Ação': d.plano_acao,
+                'Observações': d.observacoes || ''
+            }));
             
             const ws = XLSX.utils.json_to_sheet(dados);
             const wb = XLSX.utils.book_new();
