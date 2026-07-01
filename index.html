@@ -4,54 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema RNC - Elgin - Realtime DB</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-      .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
+     .container { max-width: 1600px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+     .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 20px 10px 20px; border-bottom: 3px solid #0056b3; }
         h1 { color: #0056b3; margin: 0; font-size: 24px; }
-      .header-botoes { display: flex; gap: 10px; align-items: center; }
-      .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-      .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
-      .btn-qualidade { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-      .btn-qualidade:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(40,167,69,0.4); }
-       .btn-historico { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
-       .btn-historico:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(111,66,193,0.4); } 
+     .header-botoes { display: flex; gap: 10px; align-items: center; }
+     .btn-dashboard { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+     .btn-dashboard:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+     .btn-qualidade { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+     .btn-qualidade:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(40,167,69,0.4); }
+      .btn-historico { background: linear-gradient(135deg, #6f42c1 0%, #e83e8c 100%); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
+      .btn-historico:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(111,66,193,0.4); } 
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
-      .content { padding: 20px; }
-      .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-      .form-group { display: flex; flex-direction: column; }
-      .form-group.full { grid-column: 1 / -1; }
+     .content { padding: 20px; }
+     .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+     .form-group { display: flex; flex-direction: column; }
+     .form-group.full { grid-column: 1 / -1; }
         label { font-weight: bold; margin-bottom: 5px; font-size: 13px; }
         input, textarea, select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: #0056b3; }
         input[readonly] { background: #f5f5f5; cursor: not-allowed; }
         textarea { resize: vertical; }
-      .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+     .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
         button:disabled { background: #ccc!important; cursor: not-allowed; }
-      .btn-salvar { background: #28a745; color: white; }
-      .btn-salvar:hover:not(:disabled) { background: #218838; }
-      .btn-limpar { background: #6c757d; color: white; }
-      .btn-excel { background: #217346; color: #fff; }
-      .btn-export-pecas { background: #17a2b8; color: #fff; }
-      .btn-modelo { background: #fd7e14; color: #fff; }
-      .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
-      .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
-      .status-online { color: #2e7d32; font-weight: bold; }
-      .status-erro { color: #d32f2f; font-weight: bold; }
-      .tabela-container { overflow-x: auto; margin-top: 20px; }
-      .tabela-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
-      .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px; }
+     .btn-salvar { background: #28a745; color: white; }
+     .btn-salvar:hover:not(:disabled) { background: #218838; }
+     .btn-limpar { background: #6c757d; color: white; }
+     .btn-excel { background: #217346; color: #fff; }
+     .btn-export-pecas { background: #17a2b8; color: #fff; }
+     .btn-modelo { background: #fd7e14; color: #fff; }
+     .btn-etiqueta { background: #6f42c1; color: #fff; padding: 5px 10px; font-size: 12px; }
+     .status-box { background: #e3f2fd; padding: 10px 15px; border-radius: 5px; margin-bottom: 15px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; }
+     .status-online { color: #2e7d32; font-weight: bold; }
+     .status-erro { color: #d32f2f; font-weight: bold; }
+     .tabela-container { overflow-x: auto; margin-top: 20px; }
+     .tabela-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 10px; }
+     .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 300px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #0056b3; color: white; position: sticky; top: 0; }
         tr:hover { background: #f5f5f5; }
-      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-      .loading { text-align: center; padding: 20px; color: #666; }
-      .input-ok { background-color: #e8f5e9!important; }
-      .input-warn { background-color: #fff3cd!important; }
+     .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+     .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+     .loading { text-align: center; padding: 20px; color: #666; }
+     .input-ok { background-color: #e8f5e9!important; }
+     .input-warn { background-color: #fff3cd!important; }
         @media (max-width: 768px) {.form-grid { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; }.header-botoes { width: 100%; flex-direction: column; }.header-botoes a { width: 100%; text-align: center; }.tabela-header { flex-direction: column; align-items: stretch; }.busca-input { width: 100%; } }
     </style>
 </head>
@@ -188,7 +189,6 @@
             </div>
         </div>
     </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, push, set, update, remove, get, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -296,7 +296,7 @@
                 Object.values(pecasTempDB).forEach(p => {
                     const newKey = push(ref(db, 'pecas')).key;
                     updates[`pecas/${newKey}`] = {
-                     ...p,
+                   ...p,
                         criado_em: new Date().toISOString()
                     };
                 });
@@ -446,7 +446,7 @@
             arr.sort((a,b) => new Date(b.data) - new Date(a.data)).forEach((rnc) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${rnc.id.slice(-6)}</td>
+                    <td title="${rnc.id}">${rnc.id.slice(0,8)}...</td>
                     <td>${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
                     <td>${rnc.cod_produto}</td>
                     <td>${rnc.cod_peca}</td>
@@ -557,35 +557,60 @@
         }
 
         function gerarEtiqueta100x60(rnc) {
-            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${rnc.id.slice(-6)}</title>
+            const idCompleto = rnc.id;
+            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
 <style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
-.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; }
+.etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; position: relative; }
 .header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
+.conteudo { display: flex; flex: 1; }
+.dados { flex: 1; padding-right: 2mm; }
+.qr-container { width: 18mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 2mm; }
+#qrcode { width: 15mm!important; height: 15mm!important; }
+.qr-texto { font-size: 6pt; text-align: center; margin-top: 1mm; word-break: break-all; }
 .linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
 .valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
 .footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 7pt; border-top: 1px solid #000; padding-top: 1mm; }
 .nao-conf { font-size: 7pt; max-height: 7mm; overflow: hidden; }
 @media print {.no-print { display: none; } body { margin: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-</style></head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
-<div class="etiqueta"><div class="header">RNC - NÃO CONFORME</div>
-<div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
-<div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
-<div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
-<div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
-<div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
-<div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
-<div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
-<div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
-<div class="footer">
-    <div style="display:flex; justify-content:space-between;">
-        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
-        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
+</style>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+</head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
+<div class="etiqueta">
+    <div class="header">RNC - NÃO CONFORME</div>
+    <div class="conteudo">
+        <div class="dados">
+            <div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
+            <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
+            <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
+            <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
+            <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:15mm;margin-left:2mm;">QTD:</span><span class="valor" style="width:15mm;">${rnc.qtd}</span></div>
+            <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
+            <div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+            <div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
+        </div>
+        <div class="qr-container">
+            <canvas id="qrcode"></canvas>
+            <div class="qr-texto">${idCompleto.slice(-8)}</div>
+        </div>
     </div>
-    <div style="text-align:right;">ID: ${rnc.id.slice(-6)}</div>
+    <div class="footer">
+        <div style="display:flex; justify-content:space-between;">
+            <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto}</span></span>
+            <span>Operador: <span style="border-bottom:1px solid #000;padding:0 5mm;">${rnc.visto_operador || '-'}</span></span>
+        </div>
+        <div style="text-align:left; font-size:6pt; word-break:break-all;">ID: ${idCompleto}</div>
+    </div>
 </div>
-</div></body></html>`;
+<script>
+    QRCode.toCanvas(document.getElementById('qrcode'), '${idCompleto}', {
+        width: 56,
+        margin: 0,
+        errorCorrectionLevel: 'M'
+    });
+<\/script>
+</body></html>`;
         }
     </script>
 </body>
