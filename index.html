@@ -556,17 +556,18 @@
             }
         }
 
-        function gerarEtiqueta100x60(rnc) {
-            const idCompleto = rnc.id;
-            return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
+        
+function gerarEtiqueta100x60(rnc) {
+    const idCompleto = rnc.id;
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
 <style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm; font-size: 8pt; line-height: 1.2; }
 .etiqueta { border: 2px solid #000; width: 94mm; height: 54mm; padding: 2mm; display: flex; flex-direction: column; position: relative; }
 .header { text-align: center; font-weight: bold; font-size: 10pt; border-bottom: 1px solid #000; padding-bottom: 1mm; margin-bottom: 1mm; }
-.conteudo { display: flex; flex: 1; }
-.dados { flex: 1; padding-right: 2mm; }
-.barcode-container { width: 18mm; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 2mm; }
-.barcode-container svg { width: 18mm!important; height: 12mm!important; }
+.conteudo { display: flex; flex: 1; gap: 2mm; }
+.dados { flex: 1; }
+.barcode-container { width: 22mm; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #000; padding-left: 2mm; }
+#barcode { width: 100%; height: 40mm; }
 .barcode-texto { font-size: 6pt; text-align: center; margin-top: 1mm; word-break: break-all; }
 .linha { display: flex; margin-bottom: 0.8mm; }.label { font-weight: bold; width: 25mm; flex-shrink: 0; }
 .valor { flex: 1; border-bottom: 1px dotted #999; min-height: 3mm; }.linha-dupla.valor { min-height: 6mm; }
@@ -592,7 +593,7 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
         </div>
         <div class="barcode-container">
             <svg id="barcode"></svg>
-            <div class="barcode-texto">${idCompleto.slice(-8)}</div>
+            <div class="barcode-texto">${idCompleto.slice(-12)}</div>
         </div>
     </div>
     <div class="footer">
@@ -606,14 +607,16 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 3mm;
 <script>
     JsBarcode("#barcode", "${idCompleto}", {
         format: "CODE128",
-        width: 1.9,
-        height: 50,
+        width: 2,
+        height: 80,
         displayValue: false,
-        margin: 0
+        margin: 0,
+        background: "#ffffff",
+        lineColor: "#000000"
     });
 <\/script>
 </body></html>`;
-        }
+}
     </script>
 </body>
 </html>
