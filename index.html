@@ -557,27 +557,27 @@
         }
 
         
+
 function gerarEtiqueta100x60(rnc) {
     const idCompleto = rnc.id;
-    // Pega só os últimos 12 caracteres do ID - remove o "-" inicial
-    const codigoBarcode = idCompleto.replace('-', '').slice(-12).toUpperCase();
+    // Usa os últimos 10 caracteres do ID - suficiente pra ser único e cabe no barcode
+    const codigoBarcode = idCompleto.replace(/-/g, '').slice(-10).toUpperCase();
     
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
 <style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2.5mm; font-size: 8pt; line-height: 1.2; }
-.etiqueta { border: 2px solid #000; width: 95mm; height: 55mm; padding: 2mm; display: flex; flex-direction: column; }
-.header { text-align: center; font-weight: bold; font-size: 9pt; border-bottom: 1px solid #000; padding-bottom: 0.5mm; margin-bottom: 1mm; }
-.conteudo { display: flex; flex: 1; gap: 1.5mm; overflow: hidden; }
-.dados { flex: 1; min-width: 0; }
-.barcode-container { width: 20mm; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #000; padding-left: 1.5mm; flex-shrink: 0; }
-#barcode { width: 18mm!important; height: 38mm!important; max-width: 18mm; max-height: 38mm; }
-.barcode-texto { font-size: 6pt; text-align: center; margin-top: 0.5mm; letter-spacing: 0.5px; word-break: break-all; }
-.linha { display: flex; margin-bottom: 0.7mm; font-size: 7.5pt; }
-.label { font-weight: bold; width: 23mm; flex-shrink: 0; }
-.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 2.8mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.linha-dupla.valor { min-height: 5.5mm; white-space: normal; }
-.footer { margin-top: auto; display: flex; flex-direction:column; gap:0.5mm; font-size: 6.5pt; border-top: 1px solid #000; padding-top: 0.5mm; }
-.nao-conf { font-size: 6.5pt; max-height: 5.5mm; overflow: hidden; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm; font-size: 8pt; line-height: 1.1; }
+.etiqueta { border: 2px solid #000; width: 96mm; height: 56mm; padding: 2mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: bold; font-size: 9pt; border-bottom: 1px solid #000; padding-bottom: 0.5mm; margin-bottom: 1mm; flex-shrink: 0; }
+.dados-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.linha { display: flex; margin-bottom: 0.6mm; font-size: 7.5pt; }
+.label { font-weight: bold; width: 26mm; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 2.8mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; }
+.nao-conf { min-height: 5mm; white-space: normal; overflow: hidden; }
+.footer-assinaturas { display: flex; justify-content: space-between; font-size: 7pt; border-top: 1px solid #000; padding-top: 0.5mm; margin-top: 0.5mm; flex-shrink: 0; }
+.barcode-area { border-top: 1px solid #000; padding-top: 1mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
+#barcode { width: 90mm; height: 12mm; max-width: 90mm; }
+.barcode-texto { font-size: 8pt; font-weight: bold; text-align: center; margin-top: 0.5mm; letter-spacing: 1.5px; }
+.id-pequeno { font-size: 5pt; text-align: center; color: #666; margin-top: 0.3mm; word-break: break-all; }
 @media print {.no-print { display: none; } body { margin: 0; padding: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; z-index: 9999; }
 </style>
@@ -585,34 +585,31 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2.5m
 </head><body><button class="no-print" onclick="window.print()">🖨 Imprimir</button>
 <div class="etiqueta">
     <div class="header">RNC - NÃO CONFORME</div>
-    <div class="conteudo">
-        <div class="dados">
-            <div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
-            <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
-            <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
-            <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
-            <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:13mm;margin-left:1mm;">QTD:</span><span class="valor" style="width:12mm;">${rnc.qtd}</span></div>
-            <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
-            <div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
-            <div class="linha linha-dupla"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
-        </div>
-        <div class="barcode-container">
-            <svg id="barcode"></svg>
-            <div class="barcode-texto">${codigoBarcode}</div>
-        </div>
-    <div class="footer">
-        <div style="display:flex; justify-content:space-between;">
-            <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 4mm;">${rnc.visto}</span></span>
-            <span>Operador: <span style="border-bottom:1px solid #000;padding:0 4mm;">${rnc.visto_operador || '-'}</span></span>
-        </div>
-        <div style="text-align:left; font-size:5.5pt; word-break:break-all;">ID: ${idCompleto}</div>
+    <div class="dados-area">
+        <div class="linha"><span class="label">Cód. Produto:</span><span class="valor">${rnc.cod_produto}</span></div>
+        <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
+        <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
+        <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
+        <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:14mm;margin-left:1mm;">QTD:</span><span class="valor" style="width:14mm;">${rnc.qtd}</span></div>
+        <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
+        <div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
+        <div class="linha"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
+    </div>
+    <div class="footer-assinaturas">
+        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 4mm;">${rnc.visto}</span></span>
+        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 4mm;">${rnc.visto_operador || '-'}</span></span>
+    </div>
+    <div class="barcode-area">
+        <svg id="barcode"></svg>
+        <div class="barcode-texto">${codigoBarcode}</div>
+        <div class="id-pequeno">ID: ${idCompleto}</div>
     </div>
 </div>
 <script>
     JsBarcode("#barcode", "${codigoBarcode}", {
         format: "CODE128",
-        width: 2,
-        height: 75,
+        width: 2.5,
+        height: 50,
         displayValue: false,
         margin: 0,
         background: "#ffffff",
