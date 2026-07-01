@@ -8,13 +8,16 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .container { max-width: 1400px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #28a745; }
         h1 { color: #28a745; margin: 0; font-size: 24px; }
         .btn-voltar { background: #6c757d; color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; text-decoration: none; display: inline-block; }
         .btn-voltar:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(108,117,125,0.4); }
         h2 { color: #333; margin: 25px 0 15px 0; font-size: 18px; }
         .content { padding: 20px; }
+        .card-rnc { background: #e7f3ff; border-left: 4px solid #007bff; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: none; }
+        .card-rnc h3 { color: #007bff; margin-bottom: 10px; font-size: 16px; }
+        .card-rnc p { margin: 5px 0; font-size: 14px; }
         .form-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .form-group { display: flex; flex-direction: column; }
         .form-group.full { grid-column: 1 / -1; }
@@ -25,20 +28,34 @@
         textarea { resize: vertical; }
         .botoes { display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; transition: 0.2s; }
+        .btn-buscar { background: #17a2b8; color: white; }
+        .btn-buscar:hover { background: #138496; }
         .btn-salvar { background: #28a745; color: white; }
         .btn-salvar:hover { background: #218838; }
         .btn-salvar:disabled { background: #94d3a2; cursor: not-allowed; }
         .btn-limpar { background: #6c757d; color: white; }
-        .btn-limpar:hover { background: #5a6268; }
         .btn-exportar { background: #007bff; color: white; }
         .btn-exportar:hover { background: #0056b3; }
-        #resultado { display: none; margin-top: 30px; border-top: 2px solid #28a745; padding-top: 20px; }
-        #dadosRNC { background: #f8f9fa; padding: 15px; border-radius: 6px; margin-bottom: 15px; }
-        #dadosRNC p { margin: 8px 0; line-height: 1.5; }
-        #dadosRNC hr { margin: 12px 0; border: none; border-top: 1px solid #dee2e6; }
+        .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .status-pendente { background: #ffc107; color: #000; }
+        .status-analisada { background: #28a745; color: #fff; }
+        
+        /* Histórico */
+        .historico { margin-top: 40px; border-top: 2px solid #dee2e6; padding-top: 20px; }
+        .filtros { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 15px; background: #f8f9fa; padding: 15px; border-radius: 6px; }
+        .filtros input, .filtros select { padding: 6px; font-size: 13px; }
+        .tabela-historico { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .tabela-historico th { background: #28a745; color: white; padding: 10px; text-align: left; position: sticky; top: 0; }
+        .tabela-historico td { padding: 8px 10px; border-bottom: 1px solid #dee2e6; }
+        .tabela-historico tr:hover { background: #f8f9fa; cursor: pointer; }
+        .tabela-container { max-height: 400px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 4px; }
+        .btn-acao { padding: 4px 8px; font-size: 12px; margin: 0 2px; }
+        .total-registros { font-size: 13px; color: #6c757d; margin-bottom: 10px; }
+        
         @media (max-width: 768px) { 
-            .form-grid { grid-template-columns: 1fr; } 
+            .form-grid, .filtros { grid-template-columns: 1fr; } 
             .header-bar { flex-direction: column; gap: 10px; } 
+            .tabela-container { overflow-x: auto; }
         }
     </style>
 </head>
@@ -51,11 +68,20 @@
 
         <div class="content">
             <h2>Análise de Não Conformidade</h2>
+            
+            <div id="cardRNC" class="card-rnc">
+                <h3>Dados da RNC Original <span id="badgeStatus" class="status-badge"></span></h3>
+                <div id="dadosRNCCard"></div>
+            </div>
+
             <form id="formQualidade">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="id_rnc">ID RNC *</label>
-                        <input type="text" id="id_rnc" required placeholder="Cole o ID da RNC">
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="id_rnc" required placeholder="Cole o ID da RNC" style="flex:1;">
+                            <button type="button" class="btn-buscar" onclick="buscarRNC()">BUSCAR</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="analista">ANALISTA RESPONSÁVEL *</label>
@@ -74,6 +100,7 @@
                             <option value="SCRAP">SCRAP</option>
                             <option value="ANALISE">ANÁLISE</option>
                             <option value="RETORNO FORNECEDOR">RETORNO FORNECEDOR</option>
+                            <option value="LIBERADO">LIBERADO</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -99,16 +126,48 @@
                 </div>
                 <div class="botoes">
                     <button type="submit" class="btn-salvar">SALVAR ANÁLISE</button>
-                    <button type="button" class="btn-limpar" onclick="limparForm()">LIMPAR</button>
+                    <button type="button" class="btn-exportar" onclick="exportarExcel()" id="btnExportar" disabled>EXPORTAR ATUAL</button>
+                    <button type="button" class="btn-limpar" onclick="limparTudo()">LIMPAR TUDO</button>
                 </div>
             </form>
 
-            <div id="resultado">
-                <h2>RNC + Análise Consolidada</h2>
-                <div id="dadosRNC"></div>
+            <!-- HISTÓRICO COM FILTROS -->
+            <div class="historico">
+                <h2>Histórico de Análises</h2>
+                <div class="filtros">
+                    <input type="text" id="filtroAnalista" placeholder="Filtrar por Analista" oninput="aplicarFiltros()">
+                    <select id="filtroDisposicao" onchange="aplicarFiltros()">
+                        <option value="">Todas Disposições</option>
+                        <option value="REFUGO">REFUGO</option>
+                        <option value="CONSERTO">CONSERTO</option>
+                        <option value="SCRAP">SCRAP</option>
+                        <option value="ANALISE">ANÁLISE</option>
+                        <option value="RETORNO FORNECEDOR">RETORNO FORNECEDOR</option>
+                        <option value="LIBERADO">LIBERADO</option>
+                    </select>
+                    <input type="date" id="filtroDataInicio" title="Data Início" onchange="aplicarFiltros()">
+                    <input type="date" id="filtroDataFim" title="Data Fim" onchange="aplicarFiltros()">
+                    <button type="button" class="btn-limpar" onclick="limparFiltros()">LIMPAR FILTROS</button>
+                </div>
+                <div class="total-registros" id="totalRegistros">Carregando...</div>
+                <div class="tabela-container">
+                    <table class="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th>ID RNC</th>
+                                <th>Analista</th>
+                                <th>Data Análise</th>
+                                <th>Disposição</th>
+                                <th>Custo R$</th>
+                                <th>Prazo</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabela"></tbody>
+                    </table>
+                </div>
                 <div class="botoes">
-                    <button type="button" class="btn-exportar" onclick="exportarExcel()">EXPORTAR PARA EXCEL</button>
-                    <button type="button" class="btn-limpar" onclick="novaConsulta()">NOVA CONSULTA</button>
+                    <button type="button" class="btn-exportar" onclick="exportarHistoricoExcel()">EXPORTAR HISTÓRICO FILTRADO</button>
                 </div>
             </div>
         </div>
@@ -116,7 +175,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyCSdAsEHqgjAhHFcNn0xX4IwtA2GZ7-u-Y",
@@ -131,7 +190,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let dadosCompletos = {};
+        let dadosRNCOriginal = null;
+        let dadosAnalise = null;
+        let todasAnalises = [];
+        let analisesFiltradas = [];
 
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('data_analise').valueAsDate = new Date();
@@ -139,10 +201,80 @@
             const rncId = urlParams.get('rnc');
             if (rncId) {
                 document.getElementById('id_rnc').value = rncId;
-                document.getElementById('id_rnc').readOnly = true;
-                buscarRNCCompleta(rncId);
+                buscarRNC();
             }
+            carregarHistorico();
         });
+
+        window.buscarRNC = async function() {
+            const idRnc = document.getElementById('id_rnc').value.trim();
+            if (!idRnc) {
+                alert('Digite o ID da RNC');
+                return;
+            }
+
+            try {
+                const rncSnap = await get(ref(db, `rncs/${idRnc}`));
+                if (!rncSnap.exists()) {
+                    alert('RNC não encontrada no banco de dados');
+                    document.getElementById('cardRNC').style.display = 'none';
+                    document.getElementById('btnExportar').disabled = true;
+                    return;
+                }
+                dadosRNCOriginal = { id_rnc: idRnc, ...rncSnap.val() };
+
+                const analiseSnap = await get(ref(db, `analises_qualidade/${idRnc}`));
+                dadosAnalise = analiseSnap.exists() ? analiseSnap.val() : null;
+
+                mostrarCardRNC(dadosRNCOriginal, dadosAnalise);
+
+                if (dadosAnalise) {
+                    preencherFormulario(dadosAnalise);
+                    document.getElementById('btnExportar').disabled = false;
+                } else {
+                    limparForm();
+                    document.getElementById('btnExportar').disabled = true;
+                }
+
+            } catch (e) {
+                alert('Erro ao buscar RNC: ' + e.message);
+            }
+        }
+
+        function mostrarCardRNC(rnc, analise) {
+            const card = document.getElementById('cardRNC');
+            const badge = document.getElementById('badgeStatus');
+            const dadosDiv = document.getElementById('dadosRNCCard');
+
+            if (analise) {
+                badge.className = 'status-badge status-analisada';
+                badge.textContent = 'ANALISADA';
+            } else {
+                badge.className = 'status-badge status-pendente';
+                badge.textContent = 'PENDENTE DE ANÁLISE';
+            }
+
+            dadosDiv.innerHTML = `
+                <p><strong>ID:</strong> ${rnc.id_rnc}</p>
+                <p><strong>Descrição:</strong> ${rnc.descricao || rnc.descricao_nc || '-'}</p>
+                <p><strong>Setor:</strong> ${rnc.setor || '-'}</p>
+                <p><strong>Data Abertura:</strong> ${rnc.data_abertura || rnc.data || '-'}</p>
+                <p><strong>Emitente:</strong> ${rnc.responsavel || rnc.emitente || '-'}</p>
+                <p><strong>Produto/Peça:</strong> ${rnc.produto || rnc.peca || '-'}</p>
+            `;
+            card.style.display = 'block';
+        }
+
+        function preencherFormulario(analise) {
+            document.getElementById('analista').value = analise.analista || '';
+            document.getElementById('data_analise').value = analise.data_analise || '';
+            document.getElementById('disposicao').value = analise.disposicao || '';
+            document.getElementById('custo_estimado').value = analise.custo_estimado || '';
+            document.getElementById('prazo').value = analise.prazo || '';
+            document.getElementById('causa_raiz').value = analise.causa_raiz || '';
+            document.getElementById('plano_acao').value = analise.plano_acao || '';
+            document.getElementById('observacoes').value = analise.observacoes || '';
+        }
 
         document.getElementById('formQualidade').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -160,22 +292,23 @@
                 causa_raiz: document.getElementById('causa_raiz').value,
                 plano_acao: document.getElementById('plano_acao').value,
                 observacoes: document.getElementById('observacoes').value,
-                criado_em: new Date().toISOString()
+                criado_em: dadosAnalise?.criado_em || new Date().toISOString(),
+                atualizado_em: new Date().toISOString()
             };
 
             try {
-                const rncRef = ref(db, `rncs/${analise.id_rnc}`);
-                const rncSnap = await get(rncRef);
-                if (!rncSnap.exists()) {
-                    alert('ID da RNC não encontrado. Verifique o código.');
+                if (!dadosRNCOriginal) {
+                    alert('Busque a RNC primeiro antes de salvar');
                     return;
                 }
 
                 await set(ref(db, `analises_qualidade/${analise.id_rnc}`), analise);
                 alert('Análise salva com sucesso!');
                 
-                await buscarRNCCompleta(analise.id_rnc);
-                limparForm();
+                dadosAnalise = analise;
+                mostrarCardRNC(dadosRNCOriginal, dadosAnalise);
+                document.getElementById('btnExportar').disabled = false;
+                carregarHistorico();
 
             } catch (e) {
                 alert('Erro ao salvar: ' + e.message);
@@ -185,105 +318,155 @@
             }
         });
 
-        async function buscarRNCCompleta(idRnc) {
-            try {
-                const rncSnap = await get(ref(db, `rncs/${idRnc}`));
-                const analiseSnap = await get(ref(db, `analises_qualidade/${idRnc}`));
-
-                if (!rncSnap.exists()) {
-                    alert('RNC não encontrada');
-                    return;
+        function carregarHistorico() {
+            const analisesRef = ref(db, 'analises_qualidade');
+            onValue(analisesRef, (snapshot) => {
+                todasAnalises = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach((child) => {
+                        todasAnalises.push({ id: child.key, ...child.val() });
+                    });
+                    todasAnalises.sort((a, b) => new Date(b.data_analise) - new Date(a.data_analise));
                 }
-
-                const rnc = rncSnap.val();
-                const analise = analiseSnap.exists() ? analiseSnap.val() : null;
-
-                dadosCompletos = {
-                    ...rnc,
-                    ...analise,
-                    id_rnc: idRnc,
-                    status_analise: analise ? 'ANALISADA' : 'PENDENTE'
-                };
-
-                mostrarDados(dadosCompletos);
-
-            } catch (e) {
-                alert('Erro ao buscar dados: ' + e.message);
-            }
+                aplicarFiltros();
+            });
         }
 
-        function mostrarDados(dados) {
-            const divResultado = document.getElementById('resultado');
-            const divDados = document.getElementById('dadosRNC');
+        window.aplicarFiltros = function() {
+            const filtroAnalista = document.getElementById('filtroAnalista').value.toLowerCase();
+            const filtroDisposicao = document.getElementById('filtroDisposicao').value;
+            const filtroDataInicio = document.getElementById('filtroDataInicio').value;
+            const filtroDataFim = document.getElementById('filtroDataFim').value;
+
+            analisesFiltradas = todasAnalises.filter(item => {
+                const matchAnalista = !filtroAnalista || (item.analista || '').toLowerCase().includes(filtroAnalista);
+                const matchDisposicao = !filtroDisposicao || item.disposicao === filtroDisposicao;
+                const matchDataInicio = !filtroDataInicio || item.data_analise >= filtroDataInicio;
+                const matchDataFim = !filtroDataFim || item.data_analise <= filtroDataFim;
+                return matchAnalista && matchDisposicao && matchDataInicio && matchDataFim;
+            });
+
+            renderizarTabela();
+        }
+
+        window.limparFiltros = function() {
+            document.getElementById('filtroAnalista').value = '';
+            document.getElementById('filtroDisposicao').value = '';
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            aplicarFiltros();
+        }
+
+        function renderizarTabela() {
+            const tbody = document.getElementById('corpoTabela');
+            const total = document.getElementById('totalRegistros');
             
-            divDados.innerHTML = `
-                <p><strong>ID RNC:</strong> ${dados.id_rnc || dados.id || '-'}</p>
-                <p><strong>Descrição NC:</strong> ${dados.descricao || dados.descricao_nc || '-'}</p>
-                <p><strong>Setor:</strong> ${dados.setor || '-'}</p>
-                <p><strong>Data Abertura:</strong> ${dados.data_abertura || dados.data || '-'}</p>
-                <p><strong>Responsável Abertura:</strong> ${dados.responsavel || dados.emitente || '-'}</p>
-                <hr>
-                <p><strong>Status Análise:</strong> ${dados.status_analise}</p>
-                <p><strong>Analista:</strong> ${dados.analista || '-'}</p>
-                <p><strong>Data Análise:</strong> ${dados.data_analise || '-'}</p>
-                <p><strong>Disposição:</strong> ${dados.disposicao || '-'}</p>
-                <p><strong>Causa Raiz:</strong> ${dados.causa_raiz || '-'}</p>
-                <p><strong>Plano de Ação:</strong> ${dados.plano_acao || '-'}</p>
-                <p><strong>Custo Estimado:</strong> R$ ${dados.custo_estimado ? dados.custo_estimado.toFixed(2) : '0.00'}</p>
-                <p><strong>Prazo Resolução:</strong> ${dados.prazo || '-'}</p>
-                <p><strong>Observações:</strong> ${dados.observacoes || '-'}</p>
-            `;
+            total.textContent = `Total: ${analisesFiltradas.length} registros`;
             
-            divResultado.style.display = 'block';
-            divResultado.scrollIntoView({ behavior: 'smooth' });
+            if (analisesFiltradas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">Nenhuma análise encontrada</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = analisesFiltradas.map(item => `
+                <tr onclick="carregarAnalise('${item.id_rnc}')">
+                    <td><strong>${item.id_rnc}</strong></td>
+                    <td>${item.analista || '-'}</td>
+                    <td>${item.data_analise || '-'}</td>
+                    <td>${item.disposicao || '-'}</td>
+                    <td>R$ ${item.custo_estimado ? item.custo_estimado.toFixed(2) : '0.00'}</td>
+                    <td>${item.prazo || '-'}</td>
+                    <td>
+                        <button class="btn-acao btn-buscar" onclick="event.stopPropagation(); carregarAnalise('${item.id_rnc}')">Ver</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.carregarAnalise = function(idRnc) {
+            document.getElementById('id_rnc').value = idRnc;
+            buscarRNC();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         window.exportarExcel = function() {
-            if (!dadosCompletos.id_rnc) {
+            if (!dadosRNCOriginal || !dadosAnalise) {
+                alert('Busque uma RNC com análise primeiro');
+                return;
+            }
+
+            const dados = [{
+                'ID RNC': dadosRNCOriginal.id_rnc,
+                'Descrição NC': dadosRNCOriginal.descricao || dadosRNCOriginal.descricao_nc || '',
+                'Setor': dadosRNCOriginal.setor || '',
+                'Data Abertura': dadosRNCOriginal.data_abertura || dadosRNCOriginal.data || '',
+                'Responsável Abertura': dadosRNCOriginal.responsavel || dadosRNCOriginal.emitente || '',
+                'Produto': dadosRNCOriginal.produto || dadosRNCOriginal.peca || '',
+                'Analista': dadosAnalise.analista || '',
+                'Data Análise': dadosAnalise.data_analise || '',
+                'Disposição': dadosAnalise.disposicao || '',
+                'Causa Raiz': dadosAnalise.causa_raiz || '',
+                'Plano de Ação': dadosAnalise.plano_acao || '',
+                'Custo Estimado R$': dadosAnalise.custo_estimado || 0,
+                'Prazo Resolução': dadosAnalise.prazo || '',
+                'Observações': dadosAnalise.observacoes || ''
+            }];
+
+            const ws = XLSX.utils.json_to_sheet(dados);
+            ws['!cols'] = Array(14).fill({ wch: 18 });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "RNC");
+            XLSX.writeFile(wb, `RNC_${dadosRNCOriginal.id_rnc}.xlsx`);
+        }
+
+        window.exportarHistoricoExcel = function() {
+            if (analisesFiltradas.length === 0) {
                 alert('Nenhum dado para exportar');
                 return;
             }
 
-            const dadosConsolidados = [{
-                'ID RNC': dadosCompletos.id_rnc,
-                'Descrição NC': dadosCompletos.descricao || dadosCompletos.descricao_nc,
-                'Setor': dadosCompletos.setor,
-                'Data Abertura': dadosCompletos.data_abertura || dadosCompletos.data,
-                'Responsável Abertura': dadosCompletos.responsavel || dadosCompletos.emitente,
-                'Status Análise': dadosCompletos.status_analise,
-                'Analista': dadosCompletos.analista,
-                'Data Análise': dadosCompletos.data_analise,
-                'Disposição': dadosCompletos.disposicao,
-                'Causa Raiz': dadosCompletos.causa_raiz,
-                'Plano de Ação': dadosCompletos.plano_acao,
-                'Custo Estimado R$': dadosCompletos.custo_estimado,
-                'Prazo Resolução': dadosCompletos.prazo,
-                'Observações': dadosCompletos.observacoes
-            }];
+            const dados = analisesFiltradas.map(item => ({
+                'ID RNC': item.id_rnc,
+                'Analista': item.analista || '',
+                'Data Análise': item.data_analise || '',
+                'Disposição': item.disposicao || '',
+                'Custo Estimado R$': item.custo_estimado || 0,
+                'Prazo': item.prazo || '',
+                'Causa Raiz': item.causa_raiz || '',
+                'Plano de Ação': item.plano_acao || ''
+            }));
 
-            const ws = XLSX.utils.json_to_sheet(dadosConsolidados);
+            const ws = XLSX.utils.json_to_sheet(dados);
+            ws['!cols'] = Array(8).fill({ wch: 18 });
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "RNC Completa");
-            
-            const nomeArquivo = `RNC_${dadosCompletos.id_rnc}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
-            XLSX.writeFile(wb, nomeArquivo);
+            XLSX.utils.book_append_sheet(wb, ws, "Histórico");
+            XLSX.writeFile(wb, `Historico_RNC_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
         }
 
-        window.limparForm = function() {
+        function limparForm() {
+            document.getElementById('analista').value = '';
+            document.getElementById('data_analise').valueAsDate = new Date();
+            document.getElementById('disposicao').value = '';
+            document.getElementById('custo_estimado').value = '';
+            document.getElementById('prazo').value = '';
+            document.getElementById('causa_raiz').value = '';
+            document.getElementById('plano_acao').value = '';
+            document.getElementById('observacoes').value = '';
+        }
+
+        window.limparTudo = function() {
             document.getElementById('formQualidade').reset();
             document.getElementById('data_analise').valueAsDate = new Date();
+            document.getElementById('cardRNC').style.display = 'none';
+            document.getElementById('btnExportar').disabled = true;
+            dadosRNCOriginal = null;
+            dadosAnalise = null;
         }
 
-        window.novaConsulta = function() {
-            document.getElementById('resultado').style.display = 'none';
-            document.getElementById('id_rnc').readOnly = false;
-            document.getElementById('id_rnc').value = '';
-            document.getElementById('id_rnc').focus();
-        }
-
-        document.getElementById('id_rnc').addEventListener('blur', function() {
-            if (this.value && !this.readOnly) {
-                buscarRNCCompleta(this.value);
+        document.getElementById('id_rnc').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                buscarRNC();
             }
         });
 
