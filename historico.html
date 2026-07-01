@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histórico RNC + Análise da Qualidade</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+  
+  * {
+    font-family: 'Inter', sans-serif;
+  }
+  
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(226, 232, 240, 0.6);
+  }
+  
+  .card-hover {
+    transition: all 0.3s ease;
+  }
+  
+  .card-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .status-aberto { background: #FEF3C7; color: #92400E; }
+  .status-andamento { background: #DBEAFE; color: #1E40AF; }
+  .status-concluido { background: #D1FAE5; color: #065F46; }
+  .status-cancelado { background: #FEE2E2; color: #991B1B; }
+  
+  .eficacia-eficaz { background: #D1FAE5; color: #065F46; }
+  .eficacia-parcial { background: #FEF3C7; color: #92400E; }
+  .eficacia-ineficaz { background: #FEE2E2; color: #991B1B; }
+  .eficacia-pendente { background: #E0E7FF; color: #3730A3; }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .fade-in { animation: fadeIn 0.3s ease-out; }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  @media (max-width: 768px) {
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    table {
+      min-width: 1200px;
+    }
+  }
+</style>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
+  <div class="max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8">
+    
+    <!-- Header -->
+    <div class="mb-6 fade-in">
+      <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900 mb-2">
+            Histórico RNC + Análise da Qualidade
+          </h1>
+          <p class="text-slate-600 text-sm sm:text-base">Visão unificada de não conformidades e análises de eficácia</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button id="btnExportUnified" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-all shadow-lg shadow-indigo-500/30 flex items-center gap-2 text-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            <span class="hidden sm:inline">Exportar CSV Unificado</span>
+            <span class="sm:hidden">Exportar</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de Indicadores -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+      <div class="glass-effect rounded-xl p-4 sm:p-5 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs sm:text-sm text-slate-600 mb-1">Total Registros</p>
+            <p class="text-2xl sm:text-3xl font-bold text-slate-900" id="totalRegistros">0</p>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-effect rounded-xl p-4 sm:p-5 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs sm:text-sm text-slate-600 mb-1">RNCs Abertas</p>
+            <p class="text-2xl sm:text-3xl font-bold text-amber-600" id="rncAbertas">0</p>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-effect rounded-xl p-4 sm:p-5 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs sm:text-sm text-slate-600 mb-1">Análises Pendentes</p>
+            <p class="text-2xl sm:text-3xl font-bold text-blue-600" id="analisesPendentes">0</p>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-effect rounded-xl p-4 sm:p-5 card-hover">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs sm:text-sm text-slate-600 mb-1">Eficácia Geral</p>
+            <p class="text-2xl sm:text-3xl font-bold text-emerald-600" id="eficaciaGeral">0%</p>
+          </div>
+          <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg flex items-center justify-center">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção de Importação Dupla -->
+    <div class="glass-effect rounded-xl p-4 sm:p-5 mb-6 card-hover">
+      <h2 class="text-base sm:text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+        Importar Dados CSV
+      </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="text-sm font-medium text-slate-700 mb-2 block">1. Importar RNCs (index.html)</label>
+          <label class="cursor-pointer block">
+            <input type="file" id="fileInputRNC" accept=".csv" class="hidden">
+            <div class="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-lg p-4 text-center transition-all bg-white/50">
+              <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+              <p class="text-sm text-slate-600">Clique para importar CSV de RNCs</p>
+              <p class="text-xs text-slate-400 mt-1">Colunas: Nº RNC, Data, Setor, Descrição, Status...</p>
+            </div>
+          </label>
+          <p class="text-xs text-slate-500 mt-2" id="rncCount">0 RNCs carregadas</p>
+        </div>
+        
+        <div>
+          <label class="text-sm font-medium text-slate-700 mb-2 block">2. Importar Análises (qualidade.html)</label>
+          <label class="cursor-pointer block">
+            <input type="file" id="fileInputQualidade" accept=".csv" class="hidden">
+            <div class="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-lg p-4 text-center transition-all bg-white/50">
+              <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+              <p class="text-sm text-slate-600">Clique para importar CSV de Análises</p>
+              <p class="text-xs text-slate-400 mt-1">Colunas: Nº RNC, Causa Raiz, Eficácia, Resultado...</p>
+            </div>
+          </label>
+          <p class="text-xs text-slate-500 mt-2" id="qualidadeCount">0 Análises carregadas</p>
+        </div>
+      </div>
+      
+      <div class="flex flex-wrap gap-2">
+        <button id="btnAddManual" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-all shadow-lg shadow-emerald-500/30 flex items-center gap-2 text-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Adicionar Registro Manual
+        </button>
+        <button id="btnClearAll" class="px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-medium transition-all flex items-center gap-2 text-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          Limpar Tudo
+        </button>
+      </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="glass-effect rounded-xl p-4 sm:p-5 mb-6">
+      <h2 class="text-base sm:text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+        Filtros
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div>
+          <label class="text-xs text-slate-600 mb-1 block">Data Inicial</label>
+          <input type="date" id="filterStartDate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        </div>
+        <div>
+          <label class="text-xs text-slate-600 mb-1 block">Data Final</label>
+          <input type="date" id="filterEndDate" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+        </div>
+        <div>
+          <label class="text-xs text-slate-600 mb-1 block">Setor Origem</label>
+          <select id="filterSetor" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <option value="">Todos os Setores</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-600 mb-1 block">Status RNC</label>
+          <select id="filterStatus" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <option value="">Todos</option>
+            <option value="Aberto">Aberto</option>
+            <option value="Em Andamento">Em Andamento</option>
+            <option value="Concluído">Concluído</option>
+            <option value="Cancelado">Cancelado</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-xs text-slate-600 mb-1 block">Eficácia da Ação</label>
+          <select id="filterEficacia" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+            <option value="">Todas</option>
+            <option value="Eficaz">Eficaz</option>
+            <option value="Parcialmente Eficaz">Parcialmente Eficaz</option>
+            <option value="Ineficaz">Ineficaz</option>
+            <option value="Pendente">Pendente</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela Unificada -->
+    <div class="glass-effect rounded-xl p-4 sm:p-5 mb-6">
+      <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 class="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
+          <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 002-2h2a2 2 0 002 2"></path></svg>
+          Tabela Unificada RNC + Análise
+        </h2>
+        <span class="text-sm text-slate-600" id="tableCount">0 registros</span>
+      </div>
+      <div class="table-wrapper custom-scrollbar">
+        <table class="w-full">
+          <thead>
+            <tr class="border-b border-slate-200">
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase sticky left-0 bg-white">Data</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Nº RNC</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Setor Origem</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Descrição RNC</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Tipo NC</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Causa Raiz</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Ação Corretiva</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Responsável</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Prazo</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Status RNC</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Resultado Análise</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Eficácia</th>
+              <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Obs. Qualidade</th>
+              <th class="text-center py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100">
+          </tbody>
+        </table>
+      </div>
+      <div id="emptyState" class="hidden text-center py-12">
+        <svg class="w-16 h-16 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <p class="text-slate-500 text-sm">Nenhum registro encontrado</p>
+        <p class="text-slate-400 text-xs mt-1">Importe os CSVs ou adicione um registro manual</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Registro Manual -->
+  <div id="modalRegistro" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <div class="sticky top-0 bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between">
+        <h3 class="text-xl font-bold text-slate-900">Adicionar Registro Manual</h3>
+        <button id="btnCloseModal" class="text-slate-400 hover:text-slate-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      <form id="formRegistro" class="p-6 space-y-6">
+        <!-- Dados RNC -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-3 pb-2 border-b">Dados da RNC</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Número RNC *</label>
+              <input type="text" id="inputNumero" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Data *</label>
+              <input type="date" id="inputData" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Setor Origem *</label>
+              <input type="text" id="inputSetor" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            </div>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Tipo de Não Conformidade</label>
+              <select id="inputTipoNC" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                <option value="">Selecione</option>
+                <option value="Produto">Produto</option>
+                <option value="Processo">Processo</option>
+                <option value="Sistema">Sistema</option>
+                <option value="Documentação">Documentação</option>
+                <option value="Fornecedor">Fornecedor</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Status RNC *</label>
+              <select id="inputStatus" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                <option value="Aberto">Aberto</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Concluído">Concluído</option>
+                <option value="Cancelado">Cancelado</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class="text-sm font-medium text-slate-700 mb-1 block">Descrição RNC *</label>
+            <textarea id="inputDescricao" required rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"></textarea>
+          </div>
+          <div class="mt-4">
+            <label class="text-sm font-medium text-slate-700 mb-1 block">Ação Corretiva</label>
+            <textarea id="inputAcaoCorretiva" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Responsável</label>
+              <input type="text" id="inputResponsavel" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Prazo</label>
+              <input type="date" id="inputPrazo" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados Análise Qualidade -->
+        <div>
+          <h4 class="text-sm font-semibold text-slate-900 mb-3 pb-2 border-b">Análise da Qualidade</h4>
+          <div class="mt-4">
+            <label class="text-sm font-medium text-slate-700 mb-1 block">Causa Raiz</label>
+            <textarea id="inputCausaRaiz" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"></textarea>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Resultado da Análise</label>
+              <textarea id="inputResultadoAnalise" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"></textarea>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-slate-700 mb-1 block">Eficácia da Ação</label>
+              <select id="inputEficacia" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm">
+                <option value="Pendente">Pendente</option>
+                <option value="Eficaz">Eficaz</option>
+                <option value="Parcialmente Eficaz">Parcialmente Eficaz</option>
+                <option value="Ineficaz">Ineficaz</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class="text-sm font-medium text-slate-700 mb-1 block">Observações da Qualidade</label>
+            <textarea id="inputObsQualidade" rows="2" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm"></textarea>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-4">
+          <button type="submit" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2.5 rounded-lg transition-all">
+            Salvar Registro
+          </button>
+          <button type="button" id="btnCancelModal" class="px-6 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-lg transition-all">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<script>
+let rncData = [];
+let qualidadeData = [];
+let unifiedData = [];
+let editingId = null;
+
+// Dados de exemplo já cruzados
+const sampleData = [
+  {
+    id: 1,
+    data: '2024-01-15',
+    numero: 'RNC-2024-001',
+    setorOrigem: 'Produção',
+    descricaoRNC: 'Dimensão fora da especificação no lote X123',
+    tipoNC: 'Produto',
+    causaRaiz: 'Desgaste de ferramenta de usinagem',
+    acaoCorretiva: 'Ajuste de parâmetros da máquina e substituição da ferramenta',
+    responsavel: 'João Silva',
+    prazo: '2024-02-15',
+    statusRNC: 'Concluído',
+    resultadoAnalise: 'Ação implementada com sucesso. Nova verificação dimensional em 100% do lote',
+    eficaciaAcao: 'Eficaz',
+    obsQualidade: 'Evidência fotográfica arquivada. Sem reincidência após 3 meses'
+  },
+  {
+    id: 2,
+    data: '2024-02-03',
+    numero: 'RNC-2024-002',
+    setorOrigem: 'Qualidade',
+    descricaoRNC: 'Falta de rastreabilidade em componentes críticos',
+    tipoNC: 'Processo',
+    causaRaiz: 'Falha no procedimento de identificação de lotes',
+    acaoCorretiva: 'Implementação de sistema de código de barras',
+    responsavel: 'Maria Santos',
+    prazo: '2024-03-01',
+    statusRNC: 'Em Andamento',
+    resultadoAnalise: 'Sistema em fase de testes. Validação parcial concluída',
+    eficaciaAcao: 'Parcialmente Eficaz',
+    obsQualidade: 'Aguardando conclusão da implementação em todos os setores'
+  },
+  {
+    id: 3,
+    data: '2024-02-10',
+    numero: 'RNC-2024-003',
+    setorOrigem: 'Produção',
+    descricaoRNC: 'Dimensão fora da especificação no lote X125',
+    tipoNC: 'Produto',
+    causaRaiz: 'Mesmo problema anterior - falha na manutenção preventiva',
+    acaoCorretiva: 'Revisão do plano de manutenção preventiva',
+    responsavel: 'Carlos Lima',
+    prazo: '2024-03-10',
+    statusRNC: 'Aberto',
+    resultadoAnalise: 'Pendente - análise de reincidência em andamento',
+    eficaciaAcao: 'Pendente',
+    obsQualidade: 'RNC reincidente. Ação anterior considerada ineficaz'
+  },
+  {
+    id: 4,
+    data: '2024-03-05',
+    numero: 'RNC-2024-004',
+    setorOrigem: 'Expedição',
+    descricaoRNC: 'Atraso na entrega por falta de embalagem',
+    tipoNC: 'Processo',
+    causaRaiz: 'Falta de estoque mínimo de segurança',
+    acaoCorretiva: 'Revisão do processo de compras e definição de estoque mínimo',
+    responsavel: 'Ana Costa',
+    prazo: '2024-04-01',
+    statusRNC: 'Concluído',
+    resultadoAnalise: 'Estoque mínimo implementado. Sem atrasos registrados no último mês',
+    eficaciaAcao: 'Eficaz',
+    obsQualidade: 'Indicador de on-time delivery em 98% no último período'
+  },
+  {
+    id: 5,
+    data: '2024-04-02',
+    numero: 'RNC-2024-006',
+    setorOrigem: 'Qualidade',
+    descricaoRNC: 'Falha na calibração de equipamento',
+    tipoNC: 'Sistema',
+    causaRaiz: 'Vencimento do certificado de calibração não monitorado',
+    acaoCorretiva: 'Contratação de serviço externo e criação de alerta no sistema',
+    responsavel: 'Lucia Ferreira',
+    prazo: '2024-04-20',
+    statusRNC: 'Em Andamento',
+    resultadoAnalise: 'Calibração realizada. Sistema de alerta em configuração',
+    eficaciaAcao: 'Parcialmente Eficaz',
+    obsQualidade: 'Aguardando validação final do sistema de monitoramento'
+  }
+];
+
+function init() {
+  loadData();
+  setupEventListeners();
+  updateFilters();
+  renderTable();
+  updateIndicators();
+  updateCounts();
+}
+
+function loadData() {
+  const stored = localStorage.getItem('unifiedRncData');
+  if (stored) {
+    unifiedData = JSON.parse(stored);
+  } else {
+    unifiedData = sampleData;
+    saveData();
+  }
+}
+
+function saveData() {
+  localStorage.setItem('unifiedRncData', JSON.stringify(unifiedData));
+}
+
+function setupEventListeners() {
+  document.getElementById('btnAddManual').addEventListener('click', () => openModal());
+  document.getElementById('btnCloseModal').addEventListener('click', closeModal);
+  document.getElementById('btnCancelModal').addEventListener('click', closeModal);
+  document.getElementById('modalRegistro').addEventListener('click', (e) => {
+    if (e.target.id === 'modalRegistro') closeModal();
+  });
+  document.getElementById('formRegistro').addEventListener('submit', handleSubmit);
+  document.getElementById('btnExportUnified').addEventListener('click', exportCSVUnified);
+  document.getElementById('btnClearAll').addEventListener('click', clearAllData);
+  document.getElementById('fileInputRNC').addEventListener('change', (e) => handleFileUpload(e, 'rnc'));
+  document.getElementById('fileInputQualidade').addEventListener('change', (e) => handleFileUpload(e, 'qualidade'));
+  
+  ['filterStartDate', 'filterEndDate', 'filterSetor', 'filterStatus', 'filterEficacia'].forEach(id => {
+    document.getElementById(id).addEventListener('input', applyFilters);
+  });
+}
+
+function openModal(id = null) {
+  editingId = id;
+  const modal = document.getElementById('modalRegistro');
+  const form = document.getElementById('formRegistro');
+  
+  if (id) {
+    const record = unifiedData.find(r => r.id === id);
+    document.getElementById('inputNumero').value = record.numero;
+    document.getElementById('inputData').value = record.data;
+    document.getElementById('inputSetor').value = record.setorOrigem;
+    document.getElementById('inputTipoNC').value = record.tipoNC || '';
+    document.getElementById('inputStatus').value = record.statusRNC;
+    document.getElementById('inputDescricao').value = record.descricaoRNC;
+    document.getElementById('inputAcaoCorretiva').value = record.acaoCorretiva || '';
+    document.getElementById('inputResponsavel').value = record.responsavel || '';
+    document.getElementById('inputPrazo').value = record.prazo || '';
+    document.getElementById('inputCausaRaiz').value = record.causaRaiz || '';
+    document.getElementById('inputResultadoAnalise').value = record.resultadoAnalise || '';
+    document.getElementById('inputEficacia').value = record.eficaciaAcao || 'Pendente';
+    document.getElementById('inputObsQualidade').value = record.obsQualidade || '';
+  } else {
+    form.reset();
+    document.getElementById('inputData').valueAsDate = new Date();
+    document.getElementById('inputEficacia').value = 'Pendente';
+  }
+  
+  modal.classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modalRegistro').classList.add('hidden');
+  editingId = null;
+}
+
+function handleSubmit(e) {
+  e.preventDefault();
+  
+  const record = {
+    id: editingId || Date.now(),
+    numero: document.getElementById('inputNumero').value,
+    data: document.getElementById('inputData').value,
+    setorOrigem: document.getElementById('inputSetor').value,
+    tipoNC: document.getElementById('inputTipoNC').value,
+    statusRNC: document.getElementById('inputStatus').value,
+    descricaoRNC: document.getElementById('inputDescricao').value,
+    acaoCorretiva: document.getElementById('inputAcaoCorretiva').value,
+    responsavel: document.getElementById('inputResponsavel').value,
+    prazo: document.getElementById('inputPrazo').value,
+    causaRaiz: document.getElementById('inputCausaRaiz').value,
+    resultadoAnalise: document.getElementById('inputResultadoAnalise').value,
+    eficaciaAcao: document.getElementById('inputEficacia').value,
+    obsQualidade: document.getElementById('inputObsQualidade').value
+  };
+  
+  if (editingId) {
+    const index = unifiedData.findIndex(r => r.id === editingId);
+    unifiedData[index] = record;
+  } else {
+    unifiedData.push(record);
+  }
+  
+  saveData();
+  closeModal();
+  updateFilters();
+  applyFilters();
+  updateCounts();
+  showNotification('Registro salvo com sucesso!', 'success');
+}
+
+function deleteRecord(id) {
+  if (confirm('Deseja realmente excluir este registro?')) {
+    unifiedData = unifiedData.filter(r => r.id !== id);
+    saveData();
+    applyFilters();
+    updateCounts();
+    showNotification('Registro excluído', 'info');
+  }
+}
+
+function getFilteredData() {
+  const startDate = document.getElementById('filterStartDate').value;
+  const endDate = document.getElementById('filterEndDate').value;
+  const setor = document.getElementById('filterSetor').value;
+  const status = document.getElementById('filterStatus').value;
+  const eficacia = document.getElementById('filterEficacia').value;
+  
+  return unifiedData.filter(record => {
+    if (startDate && record.data < startDate) return false;
+    if (endDate && record.data > endDate) return false;
+    if (setor && record.setorOrigem !== setor) return false;
+    if (status && record.statusRNC !== status) return false;
+    if (eficacia && record.eficaciaAcao !== eficacia) return false;
+    return true;
+  }).sort((a, b) => new Date(b.data) - new Date(a.data));
+}
+
+function applyFilters() {
+  renderTable();
+  updateIndicators();
+}
+
+function renderTable() {
+  const data = getFilteredData();
+  const tbody = document.getElementById('tableBody');
+  const emptyState = document.getElementById('emptyState');
+  
+  document.getElementById('tableCount').textContent = `${data.length} registro${data.length !== 1 ? 's' : ''}`;
+  
+  if (data.length === 0) {
+    tbody.innerHTML = '';
+    emptyState.classList.remove('hidden');
+    return;
+  }
+  
+  emptyState.classList.add('hidden');
+  
+  tbody.innerHTML = data.map(record => {
+    const statusClass = {
+      'Aberto': 'status-aberto',
+      'Em Andamento': 'status-andamento',
+      'Concluído': 'status-concluido',
+      'Cancelado': 'status-cancelado'
+    }[record.statusRNC];
+    
+    const eficaciaClass = {
+      'Eficaz': 'eficacia-eficaz',
+      'Parcialmente Eficaz': 'eficacia-parcial',
+      'Ineficaz': 'eficacia-ineficaz',
+      'Pendente': 'eficacia-pendente'
+    }[record.eficaciaAcao];
+    
+    return `
+      <tr class="hover:bg-slate-50 transition-colors fade-in">
+        <td class="py-3 px-3 text-sm text-slate-700 sticky left-0 bg-white">${formatDate(record.data)}</td>
+        <td class="py-3 px-3 text-sm font-medium text-slate-900">${record.numero}</td>
+        <td class="py-3 px-3 text-sm text-slate-700">${record.setorOrigem}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.descricaoRNC)}">${record.descricaoRNC}</td>
+        <td class="py-3 px-3 text-sm text-slate-600">${record.tipoNC || '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.causaRaiz || '')}">${record.causaRaiz || '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.acaoCorretiva || '')}">${record.acaoCorretiva || '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-700">${record.responsavel || '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-700">${record.prazo ? formatDate(record.prazo) : '-'}</td>
+        <td class="py-3 px-3">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}">
+            ${record.statusRNC}
+          </span>
+        </td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.resultadoAnalise || '')}">${record.resultadoAnalise || '-'}</td>
+        <td class="py-3 px-3">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${eficaciaClass}">
+            ${record.eficaciaAcao}
+          </span>
+        </td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.obsQualidade || '')}">${record.obsQualidade || '-'}</td>
+        <td class="py-3 px-3 text-center">
+          <button onclick="openModal(${record.id})" class="text-indigo-600 hover:text-indigo-800 mr-2" title="Editar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          </button>
+          <button onclick="deleteRecord(${record.id})" class="text-rose-600 hover:text-rose-800" title="Excluir">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function updateFilters() {
+  const setores = [...new Set(unifiedData.map(r => r.setorOrigem))].sort();
+  const select = document.getElementById('filterSetor');
+  const currentValue = select.value;
+  select.innerHTML = '<option value="">Todos os Setores</option>' + 
+    setores.map(s => `<option value="${s}">${s}</option>`).join('');
+  select.value = currentValue;
+}
+
+function updateIndicators() {
+  const data = getFilteredData();
+  const total = data.length;
+  const abertas = data.filter(r => r.statusRNC === 'Aberto' || r.statusRNC === 'Em Andamento').length;
+  const pendentes = data.filter(r => r.eficaciaAcao === 'Pendente').length;
+  const eficazes = data.filter(r => r.eficaciaAcao === 'Eficaz').length;
+  const comAnalise = data.filter(r => r.eficaciaAcao !== 'Pendente').length;
+  
+  document.getElementById('totalRegistros').textContent = total;
+  document.getElementById('rncAbertas').textContent = abertas;
+  document.getElementById('analisesPendentes').textContent = pendentes;
+  document.getElementById('eficaciaGeral').textContent = comAnalise > 0 ? Math.round((eficazes / comAnalise) * 100) + '%' : '0%';
+}
+
+function updateCounts() {
+  document.getElementById('rncCount').textContent = `${rncData.length} RNCs carregadas`;
+  document.getElementById('qualidadeCount').textContent = `${qualidadeData.length} Análises carregadas`;
+}
+
+function exportCSVUnified() {
+  const data = getFilteredData();
+  const headers = ['Data', 'Nº RNC', 'Setor Origem', 'Descrição RNC', 'Tipo NC', 'Causa Raiz', 'Ação Corretiva', 'Responsável', 'Prazo', 'Status RNC', 'Resultado Análise', 'Eficácia', 'Obs Qualidade'];
+  const rows = data.map(r => [
+    r.data, r.numero, r.setorOrigem, r.descricaoRNC, r.tipoNC || '', 
+    r.causaRaiz || '', r.acaoCorretiva || '', r.responsavel || '', r.prazo || '',
+    r.statusRNC, r.resultadoAnalise || '', r.eficaciaAcao, r.obsQualidade || ''
+  ]);
+  
+  let csv = headers.join(',') + '\n';
+  rows.forEach(row => {
+    csv += row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',') + '\n';
+  });
+  
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `RNC_Analise_Unificado_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+  showNotification('CSV unificado exportado com sucesso!', 'success');
+}
+
+function handleFileUpload(e, type) {
+  const file = e.target.files[0];
+  if (!file) return;
+  
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    try {
+      const lines = event.target.result.split('\n').filter(l => l.trim());
+      if (lines.length < 2) throw new Error('CSV vazio');
+      
+      const headers = parseCSVLine(lines[0]);
+      const importedData = lines.slice(1).map((line, idx) => {
+        const values = parseCSVLine(line);
+        const obj = {};
+        headers.forEach((h, i) => {
+          obj[normalizeHeader(h)] = values[i] || '';
+        });
+        return obj;
+      });
+      
+      if (type === 'rnc') {
+        rncData = importedData;
+      } else {
+        qualidadeData = importedData;
+      }
+      
+      mergeDatasets();
+      saveData();
+      updateFilters();
+      applyFilters();
+      updateCounts();
+      showNotification(`${importedData.length} registros de ${type === 'rnc' ? 'RNC' : 'Análise'} importados!`, 'success');
+    } catch (err) {
+      showNotification('Erro ao importar arquivo: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file, 'UTF-8');
+  e.target.value = '';
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result.map(v => v.replace(/^"|"$/g, ''));
+}
+
+function normalizeHeader(header) {
+  return header.toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/ç/g, 'c')
+    .replace(/ã/g, 'a')
+    .replace(/á/g, 'a')
+    .replace(/é/g, 'e')
+    .replace(/í/g, 'i')
+    .replace(/ó/g, 'o')
+    .replace(/ú/g, 'u')
+    .replace(/ª/g, 'a')
+    .replace(/º/g, 'o');
+}
+
+function mergeDatasets() {
+  const merged = [];
+  
+  // Mapa de análises por número RNC
+  const qualidadeMap = {};
+  qualidadeData.forEach(q => {
+    const num = q.numr rnc || q.nrnc || q.numerornc || '';
+    if (num) qualidadeMap[num] = q;
+  });
+  
+  // Junta RNCs com análises correspondentes
+  rncData.forEach(rnc => {
+    const num = rnc.numr rnc || rnc.nrnc || rnc.numerornc || '';
+    const quali = qualidadeMap[num] || {};
+    
+    merged.push({
+      id: Date.now() + Math.random(),
+      numero: num,
+      data: rnc.data || '',
+      setorOrigem: rnc.setor || rnc.setororigem || '',
+      descricaoRNC: rnc.descricao || rnc.descricaornc || '',
+      tipoNC: rnc.tiponc || rnc.tipodenoconformidade || '',
+      acaoCorretiva: rnc.acaocorretiva || '',
+      responsavel: rnc.responsavel || '',
+      prazo: rnc.prazo || '',
+      statusRNC: rnc.status || rnc.statussrnc || 'Aberto',
+      causaRaiz: quali.causaraiz || '',
+      resultadoAnalise: quali.resultadoanalise || quali.resultado || '',
+      eficaciaAcao: quali.eficaciaacao || quali.eficacia || 'Pendente',
+      obsQualidade: quali.observacoesqualidade || quali.observacoes || quali.obs || ''
+    });
+  });
+  
+  unifiedData = merged;
+}
+
+function clearAllData() {
+  if (confirm('Deseja realmente limpar todos os dados? Esta ação não pode ser desfeita.')) {
+    rncData = [];
+    qualidadeData = [];
+    unifiedData = [];
+    saveData();
+    updateFilters();
+    applyFilters();
+    updateCounts();
+    showNotification('Todos os dados foram limpos', 'info');
+  }
+}
+
+function formatDate(dateString) {
+  if (!dateString) return '-';
+  const parts = dateString.split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateString;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function showNotification(message, type = 'info') {
+  const colors = {
+    success: 'bg-emerald-500',
+    error: 'bg-rose-500',
+    info: 'bg-indigo-500'
+  };
+  
+  const notification = document.createElement('div');
+  notification.className = `fixed top-4 right-4 ${colors[type]} text-white px-6 py-3 rounded-lg shadow-lg z-50 fade-in`;
+  notification.textContent = message;
+  document.body.appendChild(notification);
+  
+  setTimeout(() => {
+    notification.remove();
+  }, 3000);
+}
+
+// Inicializar
+init();
+</script>
+<script>(function(){document.addEventListener("click",function(e){var a=e.target.closest("[data-product-id]");if(!a)return;e.preventDefault();var pid=a.getAttribute("data-product-id");if(pid)parent.postMessage({type:"ecto-artifact-link-click",productId:pid},"*")})})();</script>
+</body>
+</html>
