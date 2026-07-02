@@ -556,9 +556,8 @@
             }
         }
 
-       function gerarEtiqueta100x60(rnc) {
+      function gerarEtiqueta100x60(rnc) {
     const idCompleto = rnc.id;
-    // Remove o "-" inicial porque alguns leitores se perdem, mas mantém todo o resto
     const codigoBarcode = idCompleto.replace(/^-/, '').toUpperCase();
     
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
@@ -572,10 +571,9 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
 .valor { flex: 1; border-bottom: 1px dotted #999; min-height: 2.5mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; }
 .nao-conf { min-height: 4.5mm; white-space: normal; overflow: hidden; }
 .footer-assinaturas { display: flex; justify-content: space-between; font-size: 6.5pt; border-top: 1px solid #000; padding-top: 0.5mm; margin-top: 0.5mm; flex-shrink: 0; }
-.barcode-area { border-top: 1px solid #000; padding-top: 0.8mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
-#barcode { width: 92mm; height: 10mm; max-width: 92mm; }
-.barcode-texto { font-size: 7pt; font-weight: bold; text-align: center; margin-top: 0.3mm; letter-spacing: 0.5px; }
-.id-pequeno { font-size: 4.5pt; text-align: center; color: #666; margin-top: 0.2mm; word-break: break-all; }
+.barcode-area { border-top: 1px solid #000; padding-top: 1mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
+#barcode { width: 92mm; height: 9mm; max-width: 92mm; }
+.barcode-texto { font-size: 7pt; font-weight: bold; text-align: center; margin-top: 0.5mm; letter-spacing: 1px; }
 @media print {.no-print { display: none; } body { margin: 0; padding: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; z-index: 9999; }
 </style>
@@ -600,14 +598,13 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
     <div class="barcode-area">
         <svg id="barcode"></svg>
         <div class="barcode-texto">${codigoBarcode}</div>
-        <div class="id-pequeno">${idCompleto}</div>
     </div>
 </div>
 <script>
     JsBarcode("#barcode", "${codigoBarcode}", {
         format: "CODE128",
-        width: 1.2,
-        height: 40,
+        width: 1,
+        height: 35,
         displayValue: false,
         margin: 0,
         background: "#ffffff",
@@ -615,9 +612,7 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
     });
 <\/script>
 </body></html>`;
-} 
-
-
+}
 
     </script>
 </body>
