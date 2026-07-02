@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-  import { getDatabase, ref, onValue, update, push } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+  import { getDatabase, ref, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
   const firebaseConfig = {
     apiKey: "AIzaSyCTJDV4q-qJvZZNCN9NVx7Y4cpLSqFfEjw",
@@ -21,11 +21,10 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-  window.db = db;
-  window.dbRef = ref;
-  window.dbOnValue = onValue;
-  window.dbUpdate = update;
-  window.dbPush = push;
+  window.firebaseDB = db;
+  window.firebaseRef = ref;
+  window.firebaseOnValue = onValue;
+  window.firebaseUpdate = update;
 </script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
@@ -130,7 +129,7 @@
         <tbody id="tableBody"></tbody>
       </table>
       <div id="emptyState" class="hidden text-center py-12">
-        <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+        <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414A1 1 0 006.586 13H4"></path></svg>
         <p class="text-slate-500 font-medium">Nenhuma RNC cadastrada</p>
         <p class="text-slate-400 text-sm mt-1">Cadastre no index.html primeiro</p>
       </div>
@@ -233,16 +232,18 @@ function init() {
 }
 
 function loadFirebaseData() {
-  const rncsRef = window.dbRef(window.db, 'rncs');
-  const qualidadeRef = window.dbRef(window.db, 'qualidade');
+  const rncsRef = window.firebaseRef(window.firebaseDB, 'rncs');
+  const qualidadeRef = window.firebaseRef(window.firebaseDB, 'qualidade');
 
-  window.dbOnValue(rncsRef, (snapshot) => {
+  window.firebaseOnValue(rncsRef, (snapshot) => {
     rncsData = snapshot.val() || {};
+    console.log('RNCs:', rncsData);
     mergeData();
   });
 
-  window.dbOnValue(qualidadeRef, (snapshot) => {
+  window.firebaseOnValue(qualidadeRef, (snapshot) => {
     qualidadeData = snapshot.val() || {};
+    console.log('Qualidade:', qualidadeData);
     mergeData();
   });
 }
@@ -276,6 +277,7 @@ function mergeData() {
     });
   });
 
+  console.log('UnifiedData:', unifiedData);
   updateFilters();
   renderTable();
 }
@@ -419,11 +421,8 @@ async function handleSubmitAnalise(e) {
   const statusRnc = document.getElementById('inputStatus').value;
 
   try {
-    // Salva análise em /qualidade
-    await window.dbUpdate(window.dbRef(window.db, `qualidade/${rncId}`), analiseData);
-
-    // Atualiza status do RNC em /rncs
-    await window.dbUpdate(window.dbRef(window.db, `rncs/${rncId}`), { status: statusRnc });
+    await window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `qualidade/${rncId}`), analiseData);
+    await window.firebaseUpdate(window.firebaseRef(window.firebaseDB, `rncs/${rncId}`), { status: statusRnc });
 
     alert('Análise salva com sucesso!');
     closeModal();
