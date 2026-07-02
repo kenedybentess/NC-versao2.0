@@ -566,12 +566,12 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
 .etiqueta { border: 2.5px solid #000; width: 96mm; height: 56mm; padding: 1.5mm; display: flex; flex-direction: column; }
 .header { text-align: center; font-weight: 900; font-size: 11pt; border-bottom: 2px solid #000; padding-bottom: 0.5mm; margin-bottom: 0.8mm; flex-shrink: 0; color: #000; }
 .dados-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.linha { display: flex; margin-bottom: 0.6mm; font-size: 8.5pt; }
+.linha { display: flex; margin-bottom: 0.5mm; font-size: 8.5pt; }
 .label { font-weight: 800; width: 26mm; flex-shrink: 0; color: #000; }
-.valor { flex: 1; border-bottom: 1px solid #000; min-height: 3mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; color: #000; font-weight: 600; }
-.nao-conf { min-height: 5mm; white-space: normal; overflow: hidden; font-size: 8pt; }
-.footer-assinaturas { display: flex; justify-content: space-between; font-size: 7.5pt; padding-top: 0.6mm; margin-top: 0.5mm; flex-shrink: 0; font-weight: 700; color: #000; }
-.barcode-area { padding-top: 1mm; margin-top: 0.3mm; text-align: center; flex-shrink: 0; }
+.valor { flex: 1; border-bottom: 1px solid #000; min-height: 2.8mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; color: #000; font-weight: 600; }
+.nao-conf { min-height: 4.5mm; white-space: normal; overflow: hidden; font-size: 8pt; }
+.footer-assinaturas { display: flex; justify-content: space-between; font-size: 7.5pt; border-top: 2px solid #000; padding-top: 0.6mm; margin-top: 0.8mm; margin-bottom: 1mm; flex-shrink: 0; font-weight: 700; color: #000; }
+.barcode-area { text-align: center; flex-shrink: 0; padding-top: 0.5mm; }
 #barcode { width: 92mm; height: 8mm; max-width: 92mm; }
 @media print {.no-print { display: none; } body { margin: 0; padding: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; z-index: 9999; }
