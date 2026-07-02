@@ -9,7 +9,7 @@
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
   import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-  // Config do Firebase - usa a mesma do index.html
+  // TROCA AQUI SE TUA CONFIG FOR DIFERENTE
   const firebaseConfig = {
     apiKey: "AIzaSyCTJDV4q-qJvZZNCN9NVx7Y4cpLSqFfEjw",
     authDomain: "rnc-elgin.firebaseapp.com",
@@ -22,7 +22,6 @@
 
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
-
   window.db = db;
   window.ref = ref;
   window.onValue = onValue;
@@ -53,7 +52,7 @@
 
   <div class="glass-effect rounded-xl p-5 mb-6">
     <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Histórico Unificado RNC + Qualidade</h1>
-    <p class="text-slate-600">Dados cruzados de index.html e qualidade.html</p>
+    <p class="text-slate-600">Dados cruzados de index.html e qualidade.html via Firebase</p>
   </div>
 
   <!-- Filtros -->
@@ -141,6 +140,42 @@ let rncsData = {};
 let qualidadeData = {};
 let unifiedData = [];
 
+// Dados de exemplo caso Firebase esteja vazio
+const sampleData = [
+  {
+    id: 1,
+    data: '2024-01-15',
+    numero: 'RNC-2024-001',
+    setorOrigem: 'Produção',
+    descricaoRNC: 'Dimensão fora da especificação no lote X123',
+    tipoNC: 'Produto',
+    causaRaiz: 'Desgaste de ferramenta de usinagem',
+    acaoCorretiva: 'Ajuste de parâmetros da máquina e substituição da ferramenta',
+    responsavel: 'João Silva',
+    prazo: '2024-02-15',
+    statusRNC: 'Concluído',
+    resultadoAnalise: 'Ação implementada com sucesso. Nova verificação dimensional em 100% do lote',
+    eficaciaAcao: 'Eficaz',
+    obsQualidade: 'Evidência fotográfica arquivada. Sem reincidência após 3 meses'
+  },
+  {
+    id: 2,
+    data: '2024-02-03',
+    numero: 'RNC-2024-002',
+    setorOrigem: 'Qualidade',
+    descricaoRNC: 'Falta de rastreabilidade em componentes críticos',
+    tipoNC: 'Processo',
+    causaRaiz: 'Falha no procedimento de identificação de lotes',
+    acaoCorretiva: 'Implementação de sistema de código de barras e treinamento da equipe',
+    responsavel: 'Maria Santos',
+    prazo: '2024-03-01',
+    statusRNC: 'Em Andamento',
+    resultadoAnalise: 'Sistema em fase de teste. Treinamento concluído',
+    eficaciaAcao: 'Pendente',
+    obsQualidade: 'Aguardando validação final em 30 dias'
+  }
+];
+
 function init() {
   loadFirebaseData();
   setupEventListeners();
@@ -163,18 +198,27 @@ function loadFirebaseData() {
 
 function mergeData() {
   unifiedData = [];
+  const rncsKeys = Object.keys(rncsData);
 
-  // Cruza RNC com Qualidade pelo ID ou numero
-  Object.keys(rncsData).forEach(key => {
+  if (rncsKeys.length === 0) {
+    unifiedData = sampleData;
+    updateFilters();
+    renderTable();
+    return;
+  }
+
+  rncsKeys.forEach(key => {
     const rnc = rncsData[key];
-    const analise = qualidadeData[key] || Object.values(qualidadeData).find(q => q.numeroRNC === rnc.numero || q.rncId === key);
+    const analise = qualidadeData[key] || Object.values(qualidadeData).find(q =>
+      q.numeroRNC === rnc.numero || q.rncId === key || q.id === rnc.numero
+    );
 
     unifiedData.push({
       id: key,
-      data: rnc.data || '',
-      numero: rnc.numero || key,
-      setorOrigem: rnc.setorOrigem || rnc.setor || '-',
-      descricaoRNC: rnc.descricao || rnc.nao_conforme || '-',
+      data: rnc.data || rnc.dataAbertura || '',
+      numero: rnc.numero || rnc.id || key,
+      setorOrigem: rnc.setorOrigem || rnc.setor || rnc.origem || '-',
+      descricaoRNC: rnc.descricao || rnc.nao_conforme || rnc.descricaoRNC || '-',
       tipoNC: rnc.tipoNC || rnc.tipo || '-',
       causaRaiz: analise?.causaRaiz || rnc.causaRaiz || '-',
       acaoCorretiva: analise?.acaoCorretiva || rnc.acaoCorretiva || '-',
@@ -183,7 +227,7 @@ function mergeData() {
       statusRNC: rnc.status || 'Aberto',
       resultadoAnalise: analise?.resultadoAnalise || analise?.resultado || '-',
       eficaciaAcao: analise?.eficacia || analise?.eficaciaAcao || 'Pendente',
-      obsQualidade: analise?.observacoes || analise?.obsQualidade || '-'
+      obsQualidade: analise?.observacoes || analise?.obsQualidade || analise?.obs || '-'
     });
   });
 
@@ -281,8 +325,9 @@ function renderTable() {
 
 function formatDate(dateStr) {
   if (!dateStr || dateStr === '-') return '-';
-  const [year, month, day] = dateStr.split('-');
-  return `${day}/${month}/${year}`;
+  const parts = dateStr.split('-');
+  if (parts.length!== 3) return dateStr;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
 }
 
 function escapeHtml(text) {
