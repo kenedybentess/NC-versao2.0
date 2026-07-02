@@ -571,9 +571,8 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
 .valor { flex: 1; border-bottom: 1px dotted #999; min-height: 2.5mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; }
 .nao-conf { min-height: 4.5mm; white-space: normal; overflow: hidden; }
 .footer-assinaturas { display: flex; justify-content: space-between; font-size: 6.5pt; border-top: 1px solid #000; padding-top: 0.5mm; margin-top: 0.5mm; flex-shrink: 0; }
-.barcode-area { border-top: 1px solid #000; padding-top: 1mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
-#barcode { width: 92mm; height: 9mm; max-width: 92mm; }
-.barcode-texto { font-size: 7pt; font-weight: bold; text-align: center; margin-top: 0.5mm; letter-spacing: 1px; }
+.barcode-area { border-top: 1px solid #000; padding-top: 1.2mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
+#barcode { width: 92mm; height: 8mm; max-width: 92mm; }
 @media print {.no-print { display: none; } body { margin: 0; padding: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; z-index: 9999; }
 </style>
@@ -597,14 +596,13 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
     </div>
     <div class="barcode-area">
         <svg id="barcode"></svg>
-        <div class="barcode-texto">${codigoBarcode}</div>
     </div>
 </div>
 <script>
     JsBarcode("#barcode", "${codigoBarcode}", {
         format: "CODE128",
-        width: 1,
-        height: 35,
+        width: 0.8,
+        height: 32,
         displayValue: false,
         margin: 0,
         background: "#ffffff",
@@ -613,7 +611,6 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
 <\/script>
 </body></html>`;
 }
-
     </script>
 </body>
 </html>
