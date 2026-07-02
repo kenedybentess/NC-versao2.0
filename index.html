@@ -556,22 +556,22 @@
             }
         }
 
-      function gerarEtiqueta100x60(rnc) {
+     function gerarEtiqueta100x60(rnc) {
     const idCompleto = rnc.id;
     const codigoBarcode = idCompleto.replace(/^-/, '').toUpperCase();
     
     return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Etiqueta RNC ${idCompleto}</title>
 <style>@page { size: 100mm 60mm; margin: 0; } * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm; font-size: 8pt; line-height: 1.1; }
-.etiqueta { border: 2px solid #000; width: 96mm; height: 56mm; padding: 1.5mm; display: flex; flex-direction: column; }
-.header { text-align: center; font-weight: bold; font-size: 9pt; border-bottom: 1px solid #000; padding-bottom: 0.5mm; margin-bottom: 0.8mm; flex-shrink: 0; }
+body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm; font-size: 9pt; line-height: 1.1; color: #000; font-weight: 500; }
+.etiqueta { border: 2.5px solid #000; width: 96mm; height: 56mm; padding: 1.5mm; display: flex; flex-direction: column; }
+.header { text-align: center; font-weight: 900; font-size: 11pt; border-bottom: 2px solid #000; padding-bottom: 0.5mm; margin-bottom: 0.8mm; flex-shrink: 0; color: #000; }
 .dados-area { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.linha { display: flex; margin-bottom: 0.5mm; font-size: 7pt; }
-.label { font-weight: bold; width: 24mm; flex-shrink: 0; }
-.valor { flex: 1; border-bottom: 1px dotted #999; min-height: 2.5mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; }
-.nao-conf { min-height: 4.5mm; white-space: normal; overflow: hidden; }
-.footer-assinaturas { display: flex; justify-content: space-between; font-size: 6.5pt; border-top: 1px solid #000; padding-top: 0.5mm; margin-top: 0.5mm; flex-shrink: 0; }
-.barcode-area { border-top: 1px solid #000; padding-top: 1.2mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
+.linha { display: flex; margin-bottom: 0.6mm; font-size: 8.5pt; }
+.label { font-weight: 800; width: 26mm; flex-shrink: 0; color: #000; }
+.valor { flex: 1; border-bottom: 1px solid #000; min-height: 3mm; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-left: 1mm; color: #000; font-weight: 600; }
+.nao-conf { min-height: 5mm; white-space: normal; overflow: hidden; font-size: 8pt; }
+.footer-assinaturas { display: flex; justify-content: space-between; font-size: 7.5pt; border-top: 2px solid #000; padding-top: 0.6mm; margin-top: 0.5mm; flex-shrink: 0; font-weight: 700; color: #000; }
+.barcode-area { border-top: 2px solid #000; padding-top: 1mm; margin-top: 0.5mm; text-align: center; flex-shrink: 0; }
 #barcode { width: 92mm; height: 8mm; max-width: 92mm; }
 @media print {.no-print { display: none; } body { margin: 0; padding: 0; } }
 .no-print { position: fixed; top: 10px; right: 10px; background: #0056b3; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; z-index: 9999; }
@@ -585,14 +585,14 @@ body { font-family: Arial, sans-serif; width: 100mm; height: 60mm; padding: 2mm;
         <div class="linha"><span class="label">Cód. Peça:</span><span class="valor">${rnc.cod_peca}</span></div>
         <div class="linha"><span class="label">Denominação:</span><span class="valor">${rnc.denominacao}</span></div>
         <div class="linha"><span class="label">Origem:</span><span class="valor">${rnc.origem_defeito || '-'}</span></div>
-        <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:13mm;margin-left:1mm;">QTD:</span><span class="valor" style="width:13mm;">${rnc.qtd}</span></div>
+        <div class="linha"><span class="label">NF:</span><span class="valor">${rnc.nf}</span><span class="label" style="width:14mm;margin-left:1mm;">QTD:</span><span class="valor" style="width:14mm;">${rnc.qtd}</span></div>
         <div class="linha"><span class="label">Nº Reserva:</span><span class="valor">${rnc.reserva || '-'}</span></div>
         <div class="linha"><span class="label">Data:</span><span class="valor">${new Date(rnc.data + 'T00:00:00').toLocaleDateString('pt-BR')}</span></div>
         <div class="linha"><span class="label">Não Conf.:</span><span class="valor nao-conf">${rnc.nao_conforme}</span></div>
     </div>
     <div class="footer-assinaturas">
-        <span>Inspetor: <span style="border-bottom:1px solid #000;padding:0 3mm;">${rnc.visto}</span></span>
-        <span>Operador: <span style="border-bottom:1px solid #000;padding:0 3mm;">${rnc.visto_operador || '-'}</span></span>
+        <span>Inspetor: <span style="border-bottom:1.5px solid #000;padding:0 3mm;">${rnc.visto}</span></span>
+        <span>Operador: <span style="border-bottom:1.5px solid #000;padding:0 3mm;">${rnc.visto_operador || '-'}</span></span>
     </div>
     <div class="barcode-area">
         <svg id="barcode"></svg>
