@@ -3,86 +3,57 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Histórico RNC + Análise da Qualidade</title>
+<title>Histórico Unificado RNC + Qualidade</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+  import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+  // Config do Firebase - usa a mesma do index.html
+  const firebaseConfig = {
+    apiKey: "AIzaSyCTJDV4q-qJvZZNCN9NVx7Y4cpLSqFfEjw",
+    authDomain: "rnc-elgin.firebaseapp.com",
+    databaseURL: "https://rnc-elgin-default-rtdb.firebaseio.com",
+    projectId: "rnc-elgin",
+    storageBucket: "rnc-elgin.firebasestorage.app",
+    messagingSenderId: "153288522975",
+    appId: "1:153288522975:web:7b22d5a46d2c6d41d2d4d9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  window.db = db;
+  window.ref = ref;
+  window.onValue = onValue;
+</script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  
-    * {
-    font-family: 'Inter', sans-serif;
-  }
-  
-  .glass-effect {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(226, 232, 240, 0.6);
-  }
-  
-  .card-hover {
-    transition: all 0.3s ease;
-  }
-  
-  .card-hover:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .status-aberto { background: #FEF3C7; color: #92400E; }
-  .status-andamento { background: #DBEAFE; color: #1E40AF; }
-  .status-concluido { background: #D1FAE5; color: #065F46; }
-  .status-cancelado { background: #FEE2E2; color: #991B1B; }
-  
-  .eficacia-eficaz { background: #D1FAE5; color: #065F46; }
-  .eficacia-parcial { background: #FEF3C7; color: #92400E; }
-  .eficacia-ineficaz { background: #FEE2E2; color: #991B1B; }
-  .eficacia-pendente { background: #E0E7FF; color: #3730A3; }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .fade-in { animation: fadeIn 0.3s ease-out; }
-  
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: #f1f5f9;
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
-  }
-  
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
-  }
-
-  @media (max-width: 768px) {
-    .table-wrapper {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-    
-    table {
-      min-width: 1200px;
-    }
-  }
+    * { font-family: 'Inter', sans-serif; }
+ .glass-effect { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.6); }
+ .status-aberto { background: #FEF3C7; color: #92400E; }
+ .status-andamento { background: #DBEAFE; color: #1E40AF; }
+ .status-concluido { background: #D1FAE5; color: #065F46; }
+ .status-cancelado { background: #FEE2E2; color: #991B1B; }
+ .eficacia-eficaz { background: #D1FAE5; color: #065F46; }
+ .eficacia-parcial { background: #FEF3C7; color: #92400E; }
+ .eficacia-ineficaz { background: #FEE2E2; color: #991B1B; }
+ .eficacia-pendente { background: #E0E7FF; color: #3730A3; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+ .fade-in { animation: fadeIn 0.3s ease-out; }
+ .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+ .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+ .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+  @media (max-width: 768px) {.table-wrapper { overflow-x: auto; } table { min-width: 1200px; } }
 </style>
 </head>
 <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 min-h-screen">
 
 <div class="container mx-auto px-4 py-6 max-w-7xl">
-  
-  <!-- Header -->
+
   <div class="glass-effect rounded-xl p-5 mb-6">
-    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Histórico RNC + Análise da Qualidade</h1>
-    <p class="text-slate-600">Painel unificado de registros e análises</p>
+    <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 mb-2">Histórico Unificado RNC + Qualidade</h1>
+    <p class="text-slate-600">Dados cruzados de index.html e qualidade.html</p>
   </div>
 
   <!-- Filtros -->
@@ -132,7 +103,7 @@
         <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 002-2h2a2 2 0 002 2"></path></svg>
         Tabela Unificada RNC + Análise
       </h2>
-      <span class="text-sm text-slate-600" id="tableCount">0 registros</span>
+      <span class="text-sm text-slate-600" id="tableCount">Carregando...</span>
     </div>
     <div class="table-wrapper custom-scrollbar">
       <table class="w-full">
@@ -151,7 +122,6 @@
             <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Resultado Análise</th>
             <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Eficácia</th>
             <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Obs Qualidade</th>
-            <th class="text-left py-3 px-3 text-xs font-semibold text-slate-700 uppercase">Ações</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -159,7 +129,7 @@
       <div id="emptyState" class="hidden text-center py-12">
         <svg class="w-16 h-16 mx-auto text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
         <p class="text-slate-500 font-medium">Nenhum registro encontrado</p>
-        <p class="text-slate-400 text-sm mt-1">Importe arquivos ou adicione manualmente</p>
+        <p class="text-slate-400 text-sm mt-1">Cadastre RNCs no index.html e análises no qualidade.html</p>
       </div>
     </div>
   </div>
@@ -167,80 +137,58 @@
 </div>
 
 <script>
+let rncsData = {};
+let qualidadeData = {};
 let unifiedData = [];
-let editingId = null;
-
-// Dados de exemplo já cruzados
-const sampleData = [
-  {
-    id: 1,
-    data: '2024-01-15',
-    numero: 'RNC-2024-001',
-    setorOrigem: 'Produção',
-    descricaoRNC: 'Dimensão fora da especificação no lote X123',
-    tipoNC: 'Produto',
-    causaRaiz: 'Desgaste de ferramenta de usinagem',
-    acaoCorretiva: 'Ajuste de parâmetros da máquina e substituição da ferramenta',
-    responsavel: 'João Silva',
-    prazo: '2024-02-15',
-    statusRNC: 'Concluído',
-    resultadoAnalise: 'Ação implementada com sucesso. Nova verificação dimensional em 100% do lote',
-    eficaciaAcao: 'Eficaz',
-    obsQualidade: 'Evidência fotográfica arquivada. Sem reincidência após 3 meses'
-  },
-  {
-    id: 2,
-    data: '2024-02-03',
-    numero: 'RNC-2024-002',
-    setorOrigem: 'Qualidade',
-    descricaoRNC: 'Falta de rastreabilidade em componentes críticos',
-    tipoNC: 'Processo',
-    causaRaiz: 'Falha no procedimento de identificação de lotes',
-    acaoCorretiva: 'Implementação de sistema de código de barras e treinamento da equipe',
-    responsavel: 'Maria Santos',
-    prazo: '2024-03-01',
-    statusRNC: 'Em Andamento',
-    resultadoAnalise: 'Sistema em fase de teste. Treinamento concluído',
-    eficaciaAcao: 'Pendente',
-    obsQualidade: 'Aguardando validação final em 30 dias'
-  },
-  {
-    id: 3,
-    data: '2024-01-28',
-    numero: 'RNC-2024-003',
-    setorOrigem: 'Logística',
-    descricaoRNC: 'Produto danificado durante transporte interno',
-    tipoNC: 'Produto',
-    causaRaiz: 'Embalagem inadequada para o tipo de produto',
-    acaoCorretiva: 'Redesenho da embalagem e instalação de amortecedores',
-    responsavel: 'Pedro Costa',
-    prazo: '2024-02-20',
-    statusRNC: 'Concluído',
-    resultadoAnalise: 'Nova embalagem testada e aprovada. Zero danos nos últimos 2 meses',
-    eficaciaAcao: 'Eficaz',
-    obsQualidade: 'Custo-benefício positivo. Padrão adotado para toda linha'
-  }
-];
 
 function init() {
-  loadData();
+  loadFirebaseData();
   setupEventListeners();
+}
+
+function loadFirebaseData() {
+  const rncsRef = window.ref(window.db, 'rncs');
+  const qualidadeRef = window.ref(window.db, 'qualidade');
+
+  window.onValue(rncsRef, (snapshot) => {
+    rncsData = snapshot.val() || {};
+    mergeData();
+  });
+
+  window.onValue(qualidadeRef, (snapshot) => {
+    qualidadeData = snapshot.val() || {};
+    mergeData();
+  });
+}
+
+function mergeData() {
+  unifiedData = [];
+
+  // Cruza RNC com Qualidade pelo ID ou numero
+  Object.keys(rncsData).forEach(key => {
+    const rnc = rncsData[key];
+    const analise = qualidadeData[key] || Object.values(qualidadeData).find(q => q.numeroRNC === rnc.numero || q.rncId === key);
+
+    unifiedData.push({
+      id: key,
+      data: rnc.data || '',
+      numero: rnc.numero || key,
+      setorOrigem: rnc.setorOrigem || rnc.setor || '-',
+      descricaoRNC: rnc.descricao || rnc.nao_conforme || '-',
+      tipoNC: rnc.tipoNC || rnc.tipo || '-',
+      causaRaiz: analise?.causaRaiz || rnc.causaRaiz || '-',
+      acaoCorretiva: analise?.acaoCorretiva || rnc.acaoCorretiva || '-',
+      responsavel: analise?.responsavel || rnc.responsavel || rnc.visto || '-',
+      prazo: analise?.prazo || rnc.prazo || '-',
+      statusRNC: rnc.status || 'Aberto',
+      resultadoAnalise: analise?.resultadoAnalise || analise?.resultado || '-',
+      eficaciaAcao: analise?.eficacia || analise?.eficaciaAcao || 'Pendente',
+      obsQualidade: analise?.observacoes || analise?.obsQualidade || '-'
+    });
+  });
+
   updateFilters();
   renderTable();
-}
-
-function loadData() {
-  const stored = localStorage.getItem('unifiedRncData');
-  if (stored) {
-    unifiedData = JSON.parse(stored);
-  } else {
-    unifiedData = sampleData;
-    saveData();
-  }
-}
-
-function saveData() {
-  localStorage.setItem('unifiedRncData', JSON.stringify(unifiedData));
 }
 
 function setupEventListeners() {
@@ -250,9 +198,9 @@ function setupEventListeners() {
 }
 
 function updateFilters() {
-  const setores = [...new Set(unifiedData.map(r => r.setorOrigem))].sort();
+  const setores = [...new Set(unifiedData.map(r => r.setorOrigem).filter(s => s && s!== '-'))].sort();
   const selectSetor = document.getElementById('filterSetor');
-  selectSetor.innerHTML = '<option value="">Todos</option>' + 
+  selectSetor.innerHTML = '<option value="">Todos</option>' +
     setores.map(s => `<option value="${s}">${s}</option>`).join('');
 }
 
@@ -262,13 +210,13 @@ function getFilteredData() {
   const setor = document.getElementById('filterSetor').value;
   const status = document.getElementById('filterStatus').value;
   const eficacia = document.getElementById('filterEficacia').value;
-  
+
   return unifiedData.filter(record => {
     if (startDate && record.data < startDate) return false;
     if (endDate && record.data > endDate) return false;
-    if (setor && record.setorOrigem !== setor) return false;
-    if (status && record.statusRNC !== status) return false;
-    if (eficacia && record.eficaciaAcao !== eficacia) return false;
+    if (setor && record.setorOrigem!== setor) return false;
+    if (status && record.statusRNC!== status) return false;
+    if (eficacia && record.eficaciaAcao!== eficacia) return false;
     return true;
   }).sort((a, b) => new Date(b.data) - new Date(a.data));
 }
@@ -277,17 +225,17 @@ function renderTable() {
   const data = getFilteredData();
   const tbody = document.getElementById('tableBody');
   const emptyState = document.getElementById('emptyState');
-  
-  document.getElementById('tableCount').textContent = `${data.length} registro${data.length !== 1 ? 's' : ''}`;
-  
+
+  document.getElementById('tableCount').textContent = `${data.length} registro${data.length!== 1? 's' : ''}`;
+
   if (data.length === 0) {
     tbody.innerHTML = '';
     emptyState.classList.remove('hidden');
     return;
   }
-  
+
   emptyState.classList.add('hidden');
-  
+
   tbody.innerHTML = data.map(record => {
     const statusClass = {
       'Aberto': 'status-aberto',
@@ -295,49 +243,44 @@ function renderTable() {
       'Concluído': 'status-concluido',
       'Cancelado': 'status-cancelado'
     }[record.statusRNC] || '';
-    
+
     const eficaciaClass = {
       'Eficaz': 'eficacia-eficaz',
       'Parcialmente Eficaz': 'eficacia-parcial',
       'Ineficaz': 'eficacia-ineficaz',
       'Pendente': 'eficacia-pendente'
     }[record.eficaciaAcao] || '';
-    
+
     return `
       <tr class="hover:bg-slate-50 transition-colors fade-in">
         <td class="py-3 px-3 text-sm text-slate-700 sticky left-0 bg-white">${formatDate(record.data)}</td>
         <td class="py-3 px-3 text-sm font-medium text-slate-900">${record.numero}</td>
         <td class="py-3 px-3 text-sm text-slate-700">${record.setorOrigem}</td>
         <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.descricaoRNC)}">${record.descricaoRNC}</td>
-        <td class="py-3 px-3 text-sm text-slate-600">${record.tipoNC || '-'}</td>
-        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.causaRaiz || '')}">${record.causaRaiz || '-'}</td>
-        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.acaoCorretiva || '')}">${record.acaoCorretiva || '-'}</td>
-        <td class="py-3 px-3 text-sm text-slate-700">${record.responsavel || '-'}</td>
-        <td class="py-3 px-3 text-sm text-slate-700">${record.prazo ? formatDate(record.prazo) : '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-600">${record.tipoNC}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.causaRaiz)}">${record.causaRaiz}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.acaoCorretiva)}">${record.acaoCorretiva}</td>
+        <td class="py-3 px-3 text-sm text-slate-700">${record.responsavel}</td>
+        <td class="py-3 px-3 text-sm text-slate-700">${record.prazo!== '-'? formatDate(record.prazo) : '-'}</td>
         <td class="py-3 px-3">
           <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusClass}">
             ${record.statusRNC}
           </span>
         </td>
-        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.resultadoAnalise || '')}">${record.resultadoAnalise || '-'}</td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.resultadoAnalise)}">${record.resultadoAnalise}</td>
         <td class="py-3 px-3">
           <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${eficaciaClass}">
             ${record.eficaciaAcao}
           </span>
         </td>
-        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.obsQualidade || '')}">${record.obsQualidade || '-'}</td>
-        <td class="py-3 px-3 text-center">
-          <button onclick="alert('Editar: ${record.numero}')" class="text-indigo-600 hover:text-indigo-800" title="Editar">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-          </button>
-        </td>
+        <td class="py-3 px-3 text-sm text-slate-600 max-w-xs truncate" title="${escapeHtml(record.obsQualidade)}">${record.obsQualidade}</td>
       </tr>
     `;
   }).join('');
 }
 
 function formatDate(dateStr) {
-  if (!dateStr) return '-';
+  if (!dateStr || dateStr === '-') return '-';
   const [year, month, day] = dateStr.split('-');
   return `${day}/${month}/${year}`;
 }
@@ -349,7 +292,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// Inicia tudo quando a página carregar
 init();
 </script>
 
