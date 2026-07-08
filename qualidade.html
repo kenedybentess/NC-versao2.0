@@ -7,26 +7,20 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
         .container { max-width: 1000px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }
-        .header-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 3px solid #28a745; margin-bottom: 20px; }
-        h1 { color: #28a745; }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; }
         input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; }
+        button { background: #28a745; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header-bar">
-        <h1>Análise de Qualidade</h1>
-        <a href="index.html" class="btn-voltar">Voltar ao Início</a>
-    </div>
-
+    <h1>Análise de Qualidade</h1>
     <form id="formQualidade">
         <div class="form-group">
             <label>ID RNC (Digite e saia do campo para buscar):</label>
-            <input type="text" id="id_rnc" placeholder="Ex: -O123456789...">
+            <input type="text" id="id_rnc" placeholder="Ex: -O123456...">
         </div>
         
         <div style="background: #e9ecef; padding: 15px; border-radius: 4px; margin-bottom: 15px;">
@@ -35,13 +29,17 @@
             <p><strong>Descrição:</strong> <span id="display_desc">-</span></p>
         </div>
 
-        <div class="form-group"><label>Analista:</label><input type="text" id="analista" required></div>
-        <div class="form-group"><label>Data Análise:</label><input type="date" id="data_analise"></div>
-        <div class="form-group"><label>Disposição:</label><select id="disposicao"><option>Reparar</option><option>Descartar</option></select></div>
-        <div class="form-group"><label>Causa Raiz:</label><textarea id="causa_raiz" rows="3"></textarea></div>
-        <div class="form-group"><label>Plano de Ação:</label><textarea id="plano_acao" rows="3"></textarea></div>
+        <div class="form-group"><label>Analista:</label><input type="text" id="analista"></div>
+        <div class="form-group"><label>Disposição:</label>
+            <select id="disposicao">
+                <option value="Reparar">Reparar</option>
+                <option value="Descartar">Descartar</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Causa Raiz:</label><textarea id="causa_raiz"></textarea></div>
+        <div class="form-group"><label>Plano de Ação:</label><textarea id="plano_acao"></textarea></div>
         
-        <button type="submit" id="btnSalvar">SALVAR ANÁLISE</button>
+        <button type="submit">SALVAR ANÁLISE</button>
     </form>
 </div>
 
@@ -49,28 +47,38 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, get, update, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // SUBSTITUA COM A SUA CONFIGURAÇÃO REAL
-    const firebaseConfig = { /* Sua Configuração */ };
+    // --- CONFIGURAÇÃO DO FIREBASE ---
+    const firebaseConfig = {
+        /* COPIE AQUI AS SUAS CONFIGURAÇÕES DO PAINEL FIREBASE */
+    };
+    
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // 1. Busca automática ao sair do campo ID
+    // Função de busca
     document.getElementById('id_rnc').addEventListener('blur', async () => {
         const id = document.getElementById('id_rnc').value.trim();
         if (!id) return;
 
-        const snapshot = await get(ref(db, 'rncs/' + id));
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            document.getElementById('display_produto').textContent = data.cod_produto || 'N/A';
-            document.getElementById('display_peca').textContent = data.cod_peca || 'N/A';
-            document.getElementById('display_desc').textContent = data.nao_conforme || 'N/A';
-        } else {
-            alert("RNC não encontrada!");
+        try {
+            const snapshot = await get(ref(db, 'rncs/' + id));
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                console.log("Dados encontrados:", data); // IMPORTANTE: Verifique no F12 -> Console quais são os nomes dos campos aqui!
+
+                // Atualiza a tela com segurança (verifica se o campo existe)
+                document.getElementById('display_produto').textContent = data.cod_produto || data.produto || 'N/A';
+                document.getElementById('display_peca').textContent = data.cod_peca || data.peca || 'N/A';
+                document.getElementById('display_desc').textContent = data.nao_conforme || data.descricao || 'N/A';
+            } else {
+                alert("RNC não encontrada no banco de dados.");
+            }
+        } catch (e) {
+            console.error("Erro na busca:", e);
         }
     });
 
-    // 2. Salvar Análise
+    // Salvar
     document.getElementById('formQualidade').addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('id_rnc').value;
@@ -78,15 +86,15 @@
             analista: document.getElementById('analista').value,
             causa_raiz: document.getElementById('causa_raiz').value,
             plano_acao: document.getElementById('plano_acao').value,
-            data: new Date().toISOString()
+            status: 'CONCLUIDA'
         };
 
         try {
             await push(ref(db, 'analises_qualidade'), { rnc_id: id, ...analise });
-            await update(ref(db, 'rncs/' + id), { status: 'CONCLUIDA' });
+            await update(ref(db, `rncs/${id}`), { status: 'CONCLUIDA' });
             alert("Análise salva com sucesso!");
         } catch (e) {
-            alert("Erro: " + e.message);
+            alert("Erro ao salvar: " + e.message);
         }
     });
 </script>
