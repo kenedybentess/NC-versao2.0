@@ -1,256 +1,66 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Banco de Peças - Elgin</title>
+    <title>Gerenciamento de Peças - Elgin</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-      .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #fd7e14; }
-        h1 { color: #fd7e14; margin: 0; font-size: 24px; }
-      .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; }
-      .content { padding: 20px; }
-      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-      .stat-card { background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
-      .stat-card h3 { font-size: 32px; margin-bottom: 5px; }
-      .stat-card p { font-size: 14px; opacity: 0.9; }
-      .acoes-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
-        button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
-      .btn-export { background: #217346; color: #fff; }
-      .btn-atualizar { background: #0056b3; color: #fff; }
-      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-      .btn-salvar-edicao { background: #28a745; color: white; padding: 5px 10px; font-size: 12px; }
-      .btn-cancelar { background: #6c757d; color: white; padding: 5px 10px; font-size: 12px; }
-      .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background: #fd7e14; color: white; position: sticky; top: 0; }
-        tr:hover { background: #fff3e0; }
-        input.edit-input { padding: 4px; border: 1px solid #fd7e14; border-radius: 3px; width: 100%; }
-      .loading { text-align: center; padding: 40px; color: #666; }
-      .status-online { color: #2e7d32; font-weight: bold; }
-        @media (max-width: 768px) {.stats { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header-bar">
-            <h1>📦 Banco de Dados - Peças</h1>
-            <a href="index.html" class="btn-voltar">← Voltar</a>
-        </div>
 
-        <div class="content">
-            <div class="stats">
-                <div class="stat-card">
-                    <h3 id="totalPecas">0</h3>
-                    <p>Total de Peças</p>
-                </div>
-                <div class="stat-card">
-                    <h3 id="ultimaAtualizacao">-</h3>
-                    <p>Última Atualização</p>
-                </div>
-                <div class="stat-card">
-                    <h3 class="status-online">● Online</h3>
-                    <p>Realtime Database</p>
-                </div>
-            </div>
-
-            <div class="acoes-bar">
-                <button class="btn-atualizar" onclick="carregarPecas()">🔄 Atualizar Lista</button>
-                <button class="btn-export" onclick="exportarExcel()">📊 Exportar Excel</button>
-            </div>
-
-            <input type="text" id="buscaPeca" class="busca-input" placeholder="Buscar por código ou denominação..." oninput="filtrarTabela()">
-
-            <div style="overflow-x: auto;">
-                <table id="tabelaPecas">
-                    <thead>
-                        <tr>
-                            <th style="width: 25%;">Código Peça</th>
-                            <th style="width: 50%;">Denominação</th>
-                            <th style="width: 15%;">Cadastrado em</th>
-                            <th style="width: 10%;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaBody">
-                        <tr><td colspan="4" class="loading">Conectando ao Firebase...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    <h1>Cadastro de Peças</h1>
+    <div id="lista-pecas">Carregando peças...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, update, remove, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import * as XLSX from 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/+esm';
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+        // --- ATUALIZE ESTAS CONFIGURAÇÕES COM O SEU PAINEL FIREBASE ---
         const firebaseConfig = {
-          apiKey: "AIzaSyCSdAsEHqgjAhHFcNn0xX4IwtA2GZ7-u-Y",
-          authDomain: "nc-versao2.firebaseapp.com",
-          databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
-          projectId: "nc-versao2",
-          storageBucket: "nc-versao2.firebasestorage.app",
-          messagingSenderId: "584567247229",
-          appId: "1:584567247229:web:9c397236f3e08cc3247c14"
+            apiKey: "SUA_NOVA_API_KEY_AQUI",
+            authDomain: "nc-versao2.firebaseapp.com",
+            databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
+            projectId: "nc-versao2",
+            storageBucket: "nc-versao2.firebasestorage.app",
+            messagingSenderId: "584567247229",
+            appId: "1:584567247229:web:9c397236f3e08cc3247c14",
+            measurementId: "G-F9HFPQ07K2"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        let todasPecas = {};
-        let editandoId = null;
 
-        document.addEventListener('DOMContentLoaded', carregarPecas);
-
-        // Realtime: atualiza sozinho quando alguém cadastrar peça nova no index.html
-        onValue(ref(db, 'pecas'), (snapshot) => {
-            todasPecas = snapshot.exists()? snapshot.val() : {};
-            renderizarTabela(todasPecas);
-            atualizarStats();
-        }, (error) => {
-            console.error('Erro Firebase:', error);
-            document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="4" class="loading">Erro: ${error.message}</td></tr>`;
-        });
-
-        window.carregarPecas = async function() {
-            document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="4" class="loading">Carregando...</td></tr>';
-            try {
-                const snapshot = await get(ref(db, 'pecas'));
-                todasPecas = snapshot.exists()? snapshot.val() : {};
-                renderizarTabela(todasPecas);
-                atualizarStats();
-            } catch (e) {
-                document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="4" class="loading">Erro: ${e.message}</td></tr>`;
-            }
-        }
-
-        function atualizarStats() {
-            const arr = Object.values(todasPecas);
-            document.getElementById('totalPecas').innerText = arr.length;
-
-            if (arr.length > 0) {
-                const datas = arr.map(p => new Date(p.criado_em)).filter(d =>!isNaN(d)).sort((a,b) => b - a);
-                if (datas.length > 0) {
-                    document.getElementById('ultimaAtualizacao').innerText = datas[0].toLocaleDateString('pt-BR');
+        // Função para carregar as peças
+        function carregarPecas() {
+            const pecasRef = ref(db, 'pecas');
+            onValue(pecasRef, (snapshot) => {
+                const data = snapshot.val();
+                const container = document.getElementById('lista-pecas');
+                
+                if (!data) {
+                    container.innerHTML = "Nenhuma peça cadastrada.";
+                    return;
                 }
-            } else {
-                document.getElementById('ultimaAtualizacao').innerText = '-';
-            }
-        }
 
-        function renderizarTabela(lista) {
-            const tbody = document.getElementById('tabelaBody');
-            tbody.innerHTML = '';
-            const arr = Object.entries(lista).map(([id, data]) => ({id,...data}));
-
-            if (arr.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="loading">Nenhuma peça cadastrada. Cadastre pelo index.html primeiro.</td></tr>';
-                return;
-            }
-
-            arr.sort((a,b) => a.codigo.localeCompare(b.codigo)).forEach((p) => {
-                const tr = document.createElement('tr');
-                const dataFormat = p.criado_em? new Date(p.criado_em).toLocaleDateString('pt-BR') : '-';
-
-                if (editandoId === p.id) {
-                    tr.innerHTML = `
-                        <td><input type="text" class="edit-input" id="editCodigo" value="${p.codigo}"></td>
-                        <td><input type="text" class="edit-input" id="editDenom" value="${p.denominacao}"></td>
-                        <td>${dataFormat}</td>
-                        <td>
-                            <button class="btn-salvar-edicao" onclick="salvarEdicao('${p.id}')">Salvar</button>
-                            <button class="btn-cancelar" onclick="cancelarEdicao()">Cancelar</button>
-                        </td>
-                    `;
-                } else {
-                    tr.innerHTML = `
-                        <td><strong>${p.codigo}</strong></td>
-                        <td>${p.denominacao}</td>
-                        <td>${dataFormat}</td>
-                        <td>
-                            <button class="btn-editar" onclick="editarPeca('${p.id}')">Editar</button>
-                            <button class="btn-excluir" onclick="excluirPeca('${p.id}')">Excluir</button>
-                        </td>
-                    `;
-                }
-                tbody.appendChild(tr);
+                let html = '<table><tr><th>Código</th><th>Descrição</th><th>Quantidade</th><th>Min.</th></tr>';
+                Object.keys(data).forEach(key => {
+                    const peca = data[key];
+                    html += `<tr><td>${peca.codigo}</td><td>${peca.descricao}</td><td>${peca.quantidade}</td><td>${peca.quantidadeMinima}</td></tr>`;
+                });
+                html += '</table>';
+                container.innerHTML = html;
+            }, (error) => {
+                console.error("Erro ao carregar dados: ", error);
+                document.getElementById('lista-pecas').innerHTML = "Erro ao carregar peças. Verifique o console.";
             });
         }
 
-        window.filtrarTabela = function() {
-            const termo = document.getElementById('buscaPeca').value.toLowerCase();
-            const filtradas = Object.fromEntries(
-                Object.entries(todasPecas).filter(([id, p]) =>
-                    p.codigo.toLowerCase().includes(termo) ||
-                    p.denominacao.toLowerCase().includes(termo)
-                )
-            );
-            renderizarTabela(filtradas);
-        }
-
-        window.editarPeca = function(id) {
-            editandoId = id;
-            renderizarTabela(todasPecas);
-        }
-
-        window.cancelarEdicao = function() {
-            editandoId = null;
-            renderizarTabela(todasPecas);
-        }
-
-        window.salvarEdicao = async function(id) {
-            const novoCodigo = document.getElementById('editCodigo').value.trim();
-            const novaDenom = document.getElementById('editDenom').value.trim();
-
-            if (!novoCodigo ||!novaDenom) {
-                alert('Preencha código e denominação!');
-                return;
-            }
-
-            try {
-                await update(ref(db, `pecas/${id}`), {
-                    codigo: novoCodigo,
-                    denominacao: novaDenom
-                });
-                editandoId = null;
-                alert('Peça atualizada!');
-            } catch (e) {
-                alert('Erro: ' + e.message);
-            }
-        }
-
-        window.excluirPeca = async function(id) {
-            const peca = todasPecas[id];
-            if (confirm(`Excluir a peça ${peca.codigo} - ${peca.denominacao}?\n\nRNCs já cadastradas não serão afetadas.`)) {
-                try {
-                    await remove(ref(db, `pecas/${id}`));
-                    alert('Peça excluída!');
-                } catch (e) {
-                    alert('Erro: ' + e.message);
-                }
-            }
-        }
-
-        window.exportarExcel = function() {
-            const arr = Object.values(todasPecas);
-            if (arr.length === 0) {
-                alert('Nenhuma peça cadastrada!');
-                return;
-            }
-            const dados = [['Código Peça', 'Denominação', 'Cadastrado em']];
-            arr.forEach(p => dados.push([
-                p.codigo,
-                p.denominacao,
-                p.criado_em? new Date(p.criado_em).toLocaleString('pt-BR') : '-'
-            ]));
-            const ws = XLSX.utils.aoa_to_sheet(dados);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Peças');
-            XLSX.writeFile(wb, `Banco_Pecas_${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.xlsx`);
-        }
+        // Executa a função
+        carregarPecas();
     </script>
 </body>
 </html>
