@@ -7,31 +7,31 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-       .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-       .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #fd7e14; }
+      .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+      .header-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 3px solid #fd7e14; }
         h1 { color: #fd7e14; margin: 0; font-size: 24px; }
-       .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; }
-       .content { padding: 20px; }
-       .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-       .stat-card { background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
-       .stat-card h3 { font-size: 32px; margin-bottom: 5px; }
-       .stat-card p { font-size: 14px; opacity: 0.9; }
-       .acoes-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+      .btn-voltar { background: #6c757d; color: white; padding: 10px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; text-decoration: none; }
+      .content { padding: 20px; }
+      .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+      .stat-card { background: linear-gradient(135deg, #fd7e14 0%, #ffc107 100%); color: white; padding: 20px; border-radius: 8px; text-align: center; }
+      .stat-card h3 { font-size: 32px; margin-bottom: 5px; }
+      .stat-card p { font-size: 14px; opacity: 0.9; }
+      .acoes-bar { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
         button { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
-       .btn-export { background: #217346; color: #fff; }
-       .btn-atualizar { background: #0056b3; color: #fff; }
-       .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
-       .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-salvar-edicao { background: #28a745; color: white; padding: 5px 10px; font-size: 12px; }
-       .btn-cancelar { background: #6c757d; color: white; padding: 5px 10px; font-size: 12px; }
-       .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; margin-bottom: 15px; }
+      .btn-export { background: #217346; color: #fff; }
+      .btn-atualizar { background: #0056b3; color: #fff; }
+      .btn-editar { background: #ffc107; color: #000; padding: 5px 10px; font-size: 12px; }
+      .btn-excluir { background: #dc3545; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-salvar-edicao { background: #28a745; color: white; padding: 5px 10px; font-size: 12px; }
+      .btn-cancelar { background: #6c757d; color: white; padding: 5px 10px; font-size: 12px; }
+      .busca-input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 100%; margin-bottom: 15px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
         th { background: #fd7e14; color: white; position: sticky; top: 0; }
         tr:hover { background: #fff3e0; }
         input.edit-input { padding: 4px; border: 1px solid #fd7e14; border-radius: 3px; width: 100%; }
-       .loading { text-align: center; padding: 40px; color: #666; }
-       .status-online { color: #2e7d32; font-weight: bold; }
+      .loading { text-align: center; padding: 40px; color: #666; }
+      .status-online { color: #2e7d32; font-weight: bold; }
         @media (max-width: 768px) {.stats { grid-template-columns: 1fr; }.header-bar { flex-direction: column; gap: 10px; } }
     </style>
 </head>
@@ -105,19 +105,26 @@
 
         document.addEventListener('DOMContentLoaded', carregarPecas);
 
-        // Carrega em tempo real - atualiza sozinho quando alguém cadastrar peça nova
+        // Realtime: atualiza sozinho quando alguém cadastrar peça nova no index.html
         onValue(ref(db, 'pecas'), (snapshot) => {
             todasPecas = snapshot.exists()? snapshot.val() : {};
             renderizarTabela(todasPecas);
             atualizarStats();
+        }, (error) => {
+            console.error('Erro Firebase:', error);
+            document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="4" class="loading">Erro: ${error.message}</td></tr>`;
         });
 
         window.carregarPecas = async function() {
             document.getElementById('tabelaBody').innerHTML = '<tr><td colspan="4" class="loading">Carregando...</td></tr>';
-            const snapshot = await get(ref(db, 'pecas'));
-            todasPecas = snapshot.exists()? snapshot.val() : {};
-            renderizarTabela(todasPecas);
-            atualizarStats();
+            try {
+                const snapshot = await get(ref(db, 'pecas'));
+                todasPecas = snapshot.exists()? snapshot.val() : {};
+                renderizarTabela(todasPecas);
+                atualizarStats();
+            } catch (e) {
+                document.getElementById('tabelaBody').innerHTML = `<tr><td colspan="4" class="loading">Erro: ${e.message}</td></tr>`;
+            }
         }
 
         function atualizarStats() {
@@ -125,8 +132,12 @@
             document.getElementById('totalPecas').innerText = arr.length;
 
             if (arr.length > 0) {
-                const datas = arr.map(p => new Date(p.criado_em)).sort((a,b) => b - a);
-                document.getElementById('ultimaAtualizacao').innerText = datas[0].toLocaleDateString('pt-BR');
+                const datas = arr.map(p => new Date(p.criado_em)).filter(d =>!isNaN(d)).sort((a,b) => b - a);
+                if (datas.length > 0) {
+                    document.getElementById('ultimaAtualizacao').innerText = datas[0].toLocaleDateString('pt-BR');
+                }
+            } else {
+                document.getElementById('ultimaAtualizacao').innerText = '-';
             }
         }
 
@@ -136,7 +147,7 @@
             const arr = Object.entries(lista).map(([id, data]) => ({id,...data}));
 
             if (arr.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="loading">Nenhuma peça cadastrada.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" class="loading">Nenhuma peça cadastrada. Cadastre pelo index.html primeiro.</td></tr>';
                 return;
             }
 
