@@ -2,26 +2,26 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Gerenciamento de Peças - Elgin</title>
+    <title>Banco de Peças - Elgin</title>
     <style>
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #007bff; color: white; }
+        th { background-color: #fd7e14; color: white; }
     </style>
 </head>
 <body>
 
-    <h1>Cadastro de Peças</h1>
+    <h1>Banco de Peças - Elgin</h1>
     <div id="lista-pecas">Carregando peças...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- ATUALIZE ESTAS CONFIGURAÇÕES COM O SEU PAINEL FIREBASE ---
+        // --- INSIRA SUA CONFIGURAÇÃO DO FIREBASE AQUI ---
         const firebaseConfig = {
-            apiKey: "SUA_NOVA_API_KEY_AQUI",
+            apiKey: "COLE_A_SUA_API_KEY_AQUI",
             authDomain: "nc-versao2.firebaseapp.com",
             databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
             projectId: "nc-versao2",
@@ -34,7 +34,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Função para carregar as peças
         function carregarPecas() {
             const pecasRef = ref(db, 'pecas');
             onValue(pecasRef, (snapshot) => {
@@ -46,20 +45,25 @@
                     return;
                 }
 
-                let html = '<table><tr><th>Código</th><th>Descrição</th><th>Quantidade</th><th>Min.</th></tr>';
+                // Corrigido para buscar 'denominacao' que é o campo correto no seu banco
+                let html = '<table><tr><th>Código</th><th>Denominação</th></tr>';
+                
                 Object.keys(data).forEach(key => {
                     const peca = data[key];
-                    html += `<tr><td>${peca.codigo}</td><td>${peca.descricao}</td><td>${peca.quantidade}</td><td>${peca.quantidadeMinima}</td></tr>`;
+                    html += `<tr>
+                        <td>${peca.codigo || '-'}</td>
+                        <td>${peca.denominacao || 'Sem denominação'}</td>
+                    </tr>`;
                 });
+                
                 html += '</table>';
                 container.innerHTML = html;
             }, (error) => {
-                console.error("Erro ao carregar dados: ", error);
-                document.getElementById('lista-pecas').innerHTML = "Erro ao carregar peças. Verifique o console.";
+                console.error("Erro ao carregar:", error);
+                document.getElementById('lista-pecas').innerHTML = "Erro ao carregar. Verifique o console (F12).";
             });
         }
 
-        // Executa a função
         carregarPecas();
     </script>
 </body>
