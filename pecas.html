@@ -4,67 +4,93 @@
     <meta charset="UTF-8">
     <title>Banco de Peças - Elgin</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background-color: #fd7e14; color: white; }
+        .btn-acao { padding: 5px 10px; cursor: pointer; border: none; border-radius: 4px; color: white; }
     </style>
 </head>
 <body>
 
+<div class="container">
     <h1>Banco de Peças - Elgin</h1>
     <div id="lista-pecas">Carregando peças...</div>
+</div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- INSIRA SUA CONFIGURAÇÃO DO FIREBASE AQUI ---
-        const firebaseConfig = {
-            apiKey: "COLE_A_SUA_API_KEY_AQUI",
-            authDomain: "nc-versao2.firebaseapp.com",
-            databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
-            projectId: "nc-versao2",
-            storageBucket: "nc-versao2.firebasestorage.app",
-            messagingSenderId: "584567247229",
-            appId: "1:584567247229:web:9c397236f3e08cc3247c14",
-            measurementId: "G-F9HFPQ07K2"
-        };
+    // --- SUBSTITUA COM SUAS CONFIGURAÇÕES REAIS DO FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "COLE_A_SUA_API_KEY_AQUI",
+        authDomain: "nc-versao2.firebaseapp.com",
+        databaseURL: "https://nc-versao2-default-rtdb.firebaseio.com",
+        projectId: "nc-versao2",
+        storageBucket: "nc-versao2.firebasestorage.app",
+        messagingSenderId: "584567247229",
+        appId: "1:584567247229:web:9c397236f3e08cc3247c14",
+        measurementId: "G-F9HFPQ07K2"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-        function carregarPecas() {
-            const pecasRef = ref(db, 'pecas');
-            onValue(pecasRef, (snapshot) => {
-                const data = snapshot.val();
-                const container = document.getElementById('lista-pecas');
-                
-                if (!data) {
-                    container.innerHTML = "Nenhuma peça cadastrada.";
-                    return;
-                }
+    // Variável global para armazenar peças carregadas
+    let todasPecas = {};
 
-                // Corrigido para buscar 'denominacao' que é o campo correto no seu banco
-                let html = '<table><tr><th>Código</th><th>Denominação</th></tr>';
-                
-                Object.keys(data).forEach(key => {
-                    const peca = data[key];
-                    html += `<tr>
-                        <td>${peca.codigo || '-'}</td>
-                        <td>${peca.denominacao || 'Sem denominação'}</td>
-                    </tr>`;
-                });
-                
-                html += '</table>';
-                container.innerHTML = html;
-            }, (error) => {
-                console.error("Erro ao carregar:", error);
-                document.getElementById('lista-pecas').innerHTML = "Erro ao carregar. Verifique o console (F12).";
+    function carregarPecas() {
+        const pecasRef = ref(db, 'pecas');
+        onValue(pecasRef, (snapshot) => {
+            const data = snapshot.val();
+            todasPecas = data || {};
+            const container = document.getElementById('lista-pecas');
+            
+            if (!data) {
+                container.innerHTML = "Nenhuma peça cadastrada.";
+                return;
+            }
+
+            let html = `<table><tr><th>Código</th><th>Denominação</th><th>Ações</th></tr>`;
+            
+            Object.keys(data).forEach(key => {
+                const peca = data[key];
+                html += `<tr>
+                    <td>${peca.codigo || '-'}</td>
+                    <td>${peca.denominacao || '-'}</td>
+                    <td>
+                        <button class="btn-acao" style="background:#007bff;" onclick="editarPeca('${key}')">Editar</button>
+                        <button class="btn-acao" style="background:#dc3545;" onclick="excluirPeca('${key}')">Excluir</button>
+                    </td>
+                </tr>`;
             });
-        }
+            
+            html += `</table>`;
+            container.innerHTML = html;
+        });
+    }
 
-        carregarPecas();
-    </script>
+    // Funções globais expostas ao window
+    window.excluirPeca = async function(id) {
+        if (confirm("Tem certeza que deseja excluir esta peça?")) {
+            try {
+                await remove(ref(db, `pecas/${id}`));
+                alert('Peça excluída com sucesso!');
+            } catch (e) {
+                alert('Erro ao excluir: ' + e.message);
+            }
+        }
+    };
+
+    window.editarPeca = function(id) {
+        alert("Funcionalidade de edição selecionada para a chave: " + id);
+        // Adicione aqui a lógica para abrir um modal ou formulário de edição
+    };
+
+    carregarPecas();
+</script>
 </body>
 </html>
